@@ -1,0 +1,13 @@
+services:
+  spotify-backoffice:
+    container_name: spotify-backoffice
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: spotify-backoffice:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
