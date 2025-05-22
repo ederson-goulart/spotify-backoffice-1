@@ -1,3 +1,3 @@
 export default function Page() {
-    return <h1>Bandas</h1>
+  return <h1>Bandas</h1>;
 }
