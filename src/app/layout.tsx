@@ -10,7 +10,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
+        <div className="border-4 border-blue-800">
+          <Header />
+        </div>
         {children}
       </body>
     </html>

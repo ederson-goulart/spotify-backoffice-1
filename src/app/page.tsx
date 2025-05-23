@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <div className="border border-blue-800">
+    <div>
       <h1>Spotify Backoffice</h1>
     </div>
   );
