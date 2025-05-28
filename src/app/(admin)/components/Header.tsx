@@ -9,11 +9,12 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import Link from "next/link";
 
 const navigation = [
-  { name: "Home", href: "#", current: true },
-  { name: "Bandas", href: "#", current: false },
-  { name: "Trilhas", href: "#", current: false },
+  { name: "Home", href: "/home", current: true },
+  { name: "Bandas", href: "/bands", current: false },
+  { name: "Trilhas", href: "/tracks", current: false },
 ];
 
 function classNames(...classes: string[]) {
@@ -53,7 +54,7 @@ export default function Example() {
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
                 {navigation.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
                     href={item.href}
                     aria-current={item.current ? "page" : undefined}
@@ -65,7 +66,7 @@ export default function Example() {
                     )}
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
