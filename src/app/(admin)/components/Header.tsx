@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Disclosure,
   DisclosureButton,
@@ -10,18 +12,21 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-
-const navigation = [
-  { name: "Home", href: "/home", current: true },
-  { name: "Bandas", href: "/bands", current: false },
-  { name: "Trilhas", href: "/tracks", current: false },
-];
+import { usePathname } from "next/navigation";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function Header() {
+  const pathname = usePathname();
+
+  const navigation = [
+    { name: "Home", href: "/home", current: pathname === "/home" },
+    { name: "Bandas", href: "/bands", current: pathname === "/bands" },
+    { name: "Trilhas", href: "/tracks", current: pathname === "/tracks" },
+  ];
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -46,7 +51,8 @@ export default function Example() {
               <Image
                 alt="Your Company"
                 src="/spotify_icon.png"
-                className="h-8 w-auto"
+                className="size-8"
+                priority={true}
                 height={32}
                 width={32}
               />
@@ -133,19 +139,19 @@ export default function Example() {
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pt-2 pb-3">
           {navigation.map((item) => (
-            <DisclosureButton
-              key={item.name}
-              as="a"
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
-              className={classNames(
-                item.current
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                "block rounded-md px-3 py-2 text-base font-medium",
-              )}
-            >
-              {item.name}
+            <DisclosureButton key={item.name} as="div">
+              <Link
+                href={item.href}
+                aria-current={item.current ? "page" : undefined}
+                className={classNames(
+                  item.current
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                  "block rounded-md px-3 py-2 text-base font-medium",
+                )}
+              >
+                {item.name}
+              </Link>
             </DisclosureButton>
           ))}
         </div>
