@@ -11,6 +11,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     image: spotify-backoffice:latest
+    command: sh -c "npm install && npm run dev"
     networks:
       - spotify-network
     ports:
