@@ -9,26 +9,26 @@ datasource db {
 }
 
 // nomes no singular seguindo PascalCase. Ex.: UserInfo
-model Band { // --> Band
-  id String @id @default(uuid()) @db.Uuid
-  name String @unique
-  slug String @unique
+model Band {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
   description String? // no banco de dados coluna poderá ser null
-  status Status @default(active)
-  createdAt DateTime @default(now()) @map("created_at") // camelCase no model -> snake_case no banco de dados
-  updatedAt DateTime @updatedAt @map("updated_at")
+  status      Status   @default(active)
+  createdAt   DateTime @default(now()) @map("created_at") // camelCase no model -> snake_case no banco de dados
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // nomes no plural seguindo snake_case. Ex.: user_infos
   @@map("bands")
 }
 
 model Track {
-  id String @id @default(uuid()) @db.Uuid
-  title String
-  slug String @unique
-  durationInSeconds Int @map("duration_in_seconds")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                String   @id @default(uuid()) @db.Uuid
+  title             String
+  slug              String   @unique
+  durationInSeconds Int      @map("duration_in_seconds")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@map("tracks")
 }
@@ -37,5 +37,3 @@ enum Status {
   active
   inactive
 }
-
-
