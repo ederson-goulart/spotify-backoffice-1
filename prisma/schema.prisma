@@ -8,7 +8,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model bands {
-  id   String @id(map: "bands_pk") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name String @db.VarChar
+// nomes no singular seguindo PascalCase. Ex.: UserInfo
+model Band { // --> Band
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  slug String @unique
+  status Status @default(active)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // nomes no plural seguindo snake_case. Ex.: user_infos
+  @@map("bands")
 }
+
+model Track {
+  id String @id @default(uuid()) @db.Uuid
+  title String
+  slug String @unique
+  duration Int // duração será em segundos
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("tracks")
+}
+
+enum Status {
+  active
+  inactive
+}
+
+
