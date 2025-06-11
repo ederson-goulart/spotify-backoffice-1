@@ -18,6 +18,9 @@ model Band {
   createdAt   DateTime @default(now()) @map("created_at") // camelCase no model -> snake_case no banco de dados
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  // Estabelecendo o relacionamento: 1 Band -> N Tracks
+  tracks Track[] @relation("BandTracks")
+
   // nomes no plural seguindo snake_case. Ex.: user_infos
   @@map("bands")
 }
@@ -30,6 +33,14 @@ model Track {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
+  // Chave estrangeira (fk)
+  bandId String @map("band_id") @db.Uuid
+
+  // Relacionamento: Cada Track pertence a uma Band
+  band Band @relation("BandTracks", fields: [bandId], references: [id], onDelete: Cascade)
+
+  // Adiciona uma índice para melhorar a performance em consultas por bandas
+  @@index([bandId])
   @@map("tracks")
 }
 
