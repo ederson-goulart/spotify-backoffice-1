@@ -1,8 +1,8 @@
-import prisma from "../../../lib/prisma";
+import prisma from "../../../../lib/prisma";
 
 export async function GET() {
-  const bands = await prisma.band.findMany();
-  return Response.json(bands);
+  const items = await prisma.track.findMany();
+  return Response.json(items);
 }
 
 export function POST() {
