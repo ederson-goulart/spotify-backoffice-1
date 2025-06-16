@@ -1,5 +1,8 @@
-export function GET() {
-  return Response.json({ msg: "API Rest - Método GET" });
+import prisma from "../../../lib/prisma";
+
+export async function GET() {
+  const bands = await prisma.band.findMany();
+  return Response.json(bands);
 }
 
 export function POST() {
