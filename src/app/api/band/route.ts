@@ -5,8 +5,20 @@ export async function GET() {
   return Response.json(bands);
 }
 
-export function POST() {
-  return Response.json({ msg: "API Rest - Método POST" });
+export async function POST(request: Request) {
+  const bodyText = await request.text();
+  const params = new URLSearchParams(bodyText);
+  const name = params.get("name");
+  const slug = params.get("slug");
+  const description = params.get("description");
+  const status = params.get("status");
+
+  // TODO: Armazenar os dados no banco de dados
+
+  return Response.json({
+    msg: "Dados recebidos com sucesso!",
+    data: { name, slug, description, status },
+  });
 }
 
 export function PUT() {
