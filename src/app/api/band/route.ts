@@ -1,4 +1,6 @@
+import path from "path";
 import prisma from "../../../../lib/prisma";
+import { mkdir, writeFile } from "fs/promises";
 
 export async function GET() {
   const bands = await prisma.band.findMany();
@@ -6,13 +8,41 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const data = await request.json();
-  console.log(data);
+  const formData = await request.formData();
 
-  // TODO: Armazenar os dados no banco de dados
+  const file = formData.get("cover");
 
-  return Response.json({ msg: "Dados recebidos com sucesso!", data });
+  if (!(file instanceof File)) {
+    return Response.json(
+      { error: "Arquivo não enviado ou inválido" },
+      { status: 400 },
+    );
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadDir, { recursive: true });
+
+  const filePath = path.join(uploadDir, file.name);
+  await writeFile(filePath, buffer);
+
+  return Response.json({
+    msg: "Dados recebidos com sucesso!",
+    filePath: `/uploads/${file.name}`,
+  });
 }
+
+// JSON (abordagem)
+// export async function POST(request: Request) {
+//   const data = await request.json();
+//   console.log(data);
+
+//   // TODO: Armazenar os dados no banco de dados
+
+//   return Response.json({ msg: "Dados recebidos com sucesso!", data });
+// }
 
 // URL Enconded (abordagem)
 // export async function POST(request: Request) {
