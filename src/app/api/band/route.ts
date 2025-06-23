@@ -1,38 +1,47 @@
-import path from "path";
+//import path from "path";
 import prisma from "../../../../lib/prisma";
-import { mkdir, writeFile } from "fs/promises";
+//import { mkdir, writeFile } from "fs/promises";
+import * as z from "zod/v4";
+
+const BandSchema = z.object({
+  name: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().optional(),
+  status: z.enum(["active", "inactive"]),
+});
 
 export async function GET() {
   const bands = await prisma.band.findMany();
   return Response.json(bands);
 }
 
-export async function POST(request: Request) {
-  const formData = await request.formData();
+// FormData (abordagem)
+// export async function POST(request: Request) {
+//   const formData = await request.formData();
 
-  const file = formData.get("cover");
+//   const file = formData.get("cover");
 
-  if (!(file instanceof File)) {
-    return Response.json(
-      { error: "Arquivo não enviado ou inválido" },
-      { status: 400 },
-    );
-  }
+//   if (!(file instanceof File)) {
+//     return Response.json(
+//       { error: "Arquivo não enviado ou inválido" },
+//       { status: 400 },
+//     );
+//   }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+//   const arrayBuffer = await file.arrayBuffer();
+//   const buffer = Buffer.from(arrayBuffer);
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
+//   const uploadDir = path.join(process.cwd(), "public", "uploads");
+//   await mkdir(uploadDir, { recursive: true });
 
-  const filePath = path.join(uploadDir, file.name);
-  await writeFile(filePath, buffer);
+//   const filePath = path.join(uploadDir, file.name);
+//   await writeFile(filePath, buffer);
 
-  return Response.json({
-    msg: "Dados recebidos com sucesso!",
-    filePath: `/uploads/${file.name}`,
-  });
-}
+//   return Response.json({
+//     msg: "Dados recebidos com sucesso!",
+//     filePath: `/uploads/${file.name}`,
+//   });
+// }
 
 // JSON (abordagem)
 // export async function POST(request: Request) {
@@ -45,21 +54,44 @@ export async function POST(request: Request) {
 // }
 
 // URL Enconded (abordagem)
-// export async function POST(request: Request) {
-//   const bodyText = await request.text();
-//   const params = new URLSearchParams(bodyText);
-//   const name = params.get("name");
-//   const slug = params.get("slug");
-//   const description = params.get("description");
-//   const status = params.get("status");
+export async function POST(request: Request) {
+  try {
+    const bodyText = await request.text();
+    const params = new URLSearchParams(bodyText);
+    const name = params.get("name");
+    const slug = params.get("slug");
+    const description = params.get("description");
+    const status = params.get("status");
 
-//   // TODO: Armazenar os dados no banco de dados
+    // Validação dos dados
+    const validatedData = BandSchema.parse({
+      name: name,
+      slug: slug,
+      description: description || "",
+      status: status,
+    });
 
-//   return Response.json({
-//     msg: "Dados recebidos com sucesso!",
-//     data: { name, slug, description, status },
-//   });
-// }
+    // TODO: Armazenar os dados no banco de dados
+
+    return Response.json({
+      msg: "URL Encoded",
+      validatedData,
+    });
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return Response.json(
+        { error: "Erro de validação", details: error.issues },
+        { status: 400 },
+      );
+    }
+
+    console.log("Erro desconhecido: ", error);
+    return Response.json(
+      { error: "Erro desconhecido (erro interno do servidor)" },
+      { status: 500 },
+    );
+  }
+}
 
 export function PUT() {
   return Response.json({ msg: "API Rest - Método PUT" });
