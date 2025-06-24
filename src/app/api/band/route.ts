@@ -2,15 +2,7 @@
 import prisma from "../../../../lib/prisma";
 //import { mkdir, writeFile } from "fs/promises";
 import * as z from "zod/v4";
-
-const BandSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().optional(),
-  status: z.enum(["active", "inactive"]),
-});
-
-const BandArraySchema = z.array(BandSchema).min(1);
+import { BandSchema } from "@/app/schemas/band.schema";
 
 export async function GET() {
   const bands = await prisma.band.findMany();
@@ -50,13 +42,7 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    if (Array.isArray(data)) {
-      // tratar como array
-      const validatedData = BandArraySchema.parse(data);
-      // TODO: Armazenar os dados no banco de dados
-      return Response.json({ msg: "JSON (array)", validatedData });
-    } else if (typeof data === "object" && data !== null) {
-      // tratar como item único
+    if (typeof data === "object" && data !== null) {
       const validatedData = BandSchema.parse(data);
       // TODO: Armazenar os dados no banco de dados
       return Response.json({ msg: "JSON (único)", validatedData });
