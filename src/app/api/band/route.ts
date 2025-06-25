@@ -1,6 +1,6 @@
-//import path from "path";
+import path from "node:path";
 import prisma from "../../../../lib/prisma";
-//import { mkdir, writeFile } from "fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
 import { BandSchema } from "@/app/schemas/band.schema";
 
@@ -10,65 +10,49 @@ export async function GET() {
 }
 
 // FormData (abordagem)
-// export async function POST(request: Request) {
-//   const formData = await request.formData();
-
-//   const file = formData.get("cover");
-
-//   if (!(file instanceof File)) {
-//     return Response.json(
-//       { error: "Arquivo não enviado ou inválido" },
-//       { status: 400 },
-//     );
-//   }
-
-//   const arrayBuffer = await file.arrayBuffer();
-//   const buffer = Buffer.from(arrayBuffer);
-
-//   const uploadDir = path.join(process.cwd(), "public", "uploads");
-//   await mkdir(uploadDir, { recursive: true });
-
-//   const filePath = path.join(uploadDir, file.name);
-//   await writeFile(filePath, buffer);
-
-//   return Response.json({
-//     msg: "Dados recebidos com sucesso!",
-//     filePath: `/uploads/${file.name}`,
-//   });
-// }
-
-// JSON (abordagem)
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const formData = await request.formData();
+    console.log(formData);
 
-    if (typeof data === "object" && data !== null) {
-      const validatedData = BandSchema.parse(data);
-      // TODO: Armazenar os dados no banco de dados
-      return Response.json({ msg: "JSON (único)", validatedData });
-    } else {
-      return Response.json(
-        { error: "Dados encaminhados em um formato inválido" },
-        { status: 400 },
-      );
+    const data = {
+      name: formData.get("name"),
+      slug: formData.get("slug"),
+      description: formData.get("description") || "",
+      status: formData.get("status"),
+      cover: formData.get("cover"),
+    };
+
+    const validatedData = BandSchema.parse(data);
+
+    if (!(data.cover instanceof File)) {
+      throw new Error("Tipo inválido de arquivo");
     }
+
+    const arrayBuffer = await data.cover.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
+
+    const filePath = path.join(uploadDir, data.cover.name);
+    await writeFile(filePath, buffer);
+
+    return Response.json({
+      msg: "FormData",
+      validatedData,
+      filePath: `/uploads/${data.cover.name}`,
+    });
   } catch (error: unknown) {
-    if (error instanceof SyntaxError) {
-      console.error(
-        "Erro de sintaxe ao ler o JSON do Body da requisição",
-        error.message,
-      );
-      return Response.json(
-        { error: "Conteúdo (body) da requisição está inválido!" },
-        { status: 400 },
-      );
-    }
-
     if (error instanceof z.ZodError) {
       return Response.json(
         { error: "Erro de validação", details: error.issues },
         { status: 400 },
       );
+    }
+
+    if (error instanceof Error) {
+      return Response.json({ error: error.message }, { status: 400 });
     }
 
     console.log("Erro desconhecido: ", error);
@@ -77,7 +61,63 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  /*
+  
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadDir, { recursive: true });
+
+  const filePath = path.join(uploadDir, file.name);
+  await writeFile(filePath, buffer);
+
+  
+  */
 }
+
+// JSON (abordagem)
+// export async function POST(request: Request) {
+//   try {
+//     const data = await request.json();
+
+//     if (typeof data === "object" && data !== null) {
+//       const validatedData = BandSchema.parse(data);
+//       // TODO: Armazenar os dados no banco de dados
+//       return Response.json({ msg: "JSON (único)", validatedData });
+//     } else {
+//       return Response.json(
+//         { error: "Dados encaminhados em um formato inválido" },
+//         { status: 400 },
+//       );
+//     }
+//   } catch (error: unknown) {
+//     if (error instanceof SyntaxError) {
+//       console.error(
+//         "Erro de sintaxe ao ler o JSON do Body da requisição",
+//         error.message,
+//       );
+//       return Response.json(
+//         { error: "Conteúdo (body) da requisição está inválido!" },
+//         { status: 400 },
+//       );
+//     }
+
+//     if (error instanceof z.ZodError) {
+//       return Response.json(
+//         { error: "Erro de validação", details: error.issues },
+//         { status: 400 },
+//       );
+//     }
+
+//     console.log("Erro desconhecido: ", error);
+//     return Response.json(
+//       { error: "Erro desconhecido (erro interno do servidor)" },
+//       { status: 500 },
+//     );
+//   }
+// }
 
 // URL Enconded (abordagem)
 // export async function POST(request: Request) {
