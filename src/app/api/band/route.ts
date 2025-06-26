@@ -3,6 +3,7 @@ import prisma from "../../../../lib/prisma";
 import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
 import { BandSchema } from "@/app/schemas/band.schema";
+import { PrismaClientInitializationError } from "../../../../generated/prisma/runtime/library";
 
 export async function GET() {
   const bands = await prisma.band.findMany();
@@ -53,6 +54,8 @@ export async function POST(request: Request) {
       filePath: `/uploads/${data.cover.name}`,
     });
   } catch (error: unknown) {
+    console.error("Erro capturado: ", error);
+
     if (error instanceof z.ZodError) {
       return Response.json(
         { error: "Erro de validação", details: error.issues },
@@ -60,11 +63,23 @@ export async function POST(request: Request) {
       );
     }
 
-    if (error instanceof Error) {
-      return Response.json({ error: error.message }, { status: 400 });
+    if (error instanceof PrismaClientInitializationError) {
+      return Response.json(
+        { error: "Erro de conexão com o banco de dados" },
+        { status: 500 },
+      );
     }
 
-    console.log("Erro desconhecido: ", error);
+    if (error instanceof Error) {
+      return Response.json(
+        {
+          error:
+            "Erro interno do servidor. Solicite para equipe responsável a avaliação dos logs de erros.",
+        },
+        { status: 500 },
+      );
+    }
+
     return Response.json(
       { error: "Erro desconhecido (erro interno do servidor)" },
       { status: 500 },
