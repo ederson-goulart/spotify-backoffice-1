@@ -1,4 +1,5 @@
 import path from "node:path";
+import crypto from "node:crypto";
 import prisma from "../../../../lib/prisma";
 import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
@@ -36,7 +37,12 @@ export async function POST(request: Request) {
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadDir, { recursive: true });
 
-    const filePath = path.join(uploadDir, data.cover.name);
+    // define um nome único para o arquivo:
+    const uniqueName = crypto.randomUUID();
+    const extension = path.extname(data.cover.name);
+    const fileName = `${uniqueName}${extension}`;
+
+    const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, buffer);
 
     console.log(validatedData);
@@ -44,13 +50,14 @@ export async function POST(request: Request) {
     console.log(dataWithoutCover);
 
     // Inserir os dados no banco de dados
+    /*
     const insertedItem = await prisma.band.create({
       data: dataWithoutCover,
     });
-
+    */
     return Response.json({
       msg: "FormData",
-      insertedItem,
+      //insertedItem,
       filePath: `/uploads/${data.cover.name}`,
     });
   } catch (error: unknown) {
