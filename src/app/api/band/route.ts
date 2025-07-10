@@ -45,19 +45,20 @@ export async function POST(request: Request) {
     const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, buffer);
 
-    console.log(validatedData);
-    const { cover, ...dataWithoutCover } = validatedData;
-    console.log(dataWithoutCover);
-
     // Inserir os dados no banco de dados
-    /*
     const insertedItem = await prisma.band.create({
-      data: dataWithoutCover,
+      data: {
+        name: validatedData.name,
+        slug: validatedData.slug,
+        description: validatedData.description,
+        status: validatedData.status,
+        coverUrl: fileName,
+      },
     });
-    */
+
     return Response.json({
       msg: "FormData",
-      //insertedItem,
+      insertedItem,
       filePath: `/uploads/${data.cover.name}`,
     });
   } catch (error: unknown) {
@@ -92,20 +93,6 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-
-  /*
-  
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-
-  const filePath = path.join(uploadDir, file.name);
-  await writeFile(filePath, buffer);
-
-  
-  */
 }
 
 // JSON (abordagem)
