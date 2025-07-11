@@ -4,7 +4,11 @@ import prisma from "../../../../lib/prisma";
 import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
 import { BandSchema } from "@/app/schemas/band.schema";
-import { PrismaClientInitializationError } from "../../../../generated/prisma/runtime/library";
+import {
+  PrismaClientInitializationError,
+  PrismaClientKnownRequestError,
+} from "../../../../generated/prisma/runtime/library";
+import { CustomError } from "@/app/utils/CustomError";
 
 export async function GET() {
   const bands = await prisma.band.findMany();
@@ -27,8 +31,20 @@ export async function POST(request: Request) {
 
     const validatedData = BandSchema.parse(data);
 
+    // TODO: Verificar se o registro já existe!
+    const bandExists = await prisma.band.findFirst({
+      where: {
+        name: validatedData.name,
+      },
+    });
+
+    // truthy, falsy
+    if (bandExists) {
+      throw new CustomError("Banda já cadastrada", 409);
+    }
+
     if (!(data.cover instanceof File)) {
-      throw new Error("Tipo inválido de arquivo");
+      throw new CustomError("Tipo inválido de arquivo", 400);
     }
 
     const arrayBuffer = await data.cover.arrayBuffer();
@@ -75,6 +91,19 @@ export async function POST(request: Request) {
       return Response.json(
         { error: "Erro de conexão com o banco de dados" },
         { status: 500 },
+      );
+    }
+
+    if (error instanceof PrismaClientKnownRequestError) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    if (error instanceof CustomError) {
+      return Response.json(
+        {
+          error: error.message,
+        },
+        { status: error.statusCode },
       );
     }
 
