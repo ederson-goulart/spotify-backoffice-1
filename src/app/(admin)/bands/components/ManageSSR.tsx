@@ -23,7 +23,7 @@ const TableRow = ({ band }: { band: Band }) => {
   );
 };
 
-export default async function List() {
+export default async function ManageSSR() {
   const response = await fetch("http://localhost:3000/api/band");
   const bands: Band[] = await response.json();
   return (
