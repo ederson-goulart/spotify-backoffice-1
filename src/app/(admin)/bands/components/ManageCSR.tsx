@@ -34,6 +34,10 @@ export default function ManageCSR() {
   useEffect(() => {
     const fetchBands = async () => {
       try {
+        await new Promise<boolean>((resolve) => {
+          setTimeout(() => resolve(true), 3000);
+        });
+
         const response = await fetch("http://localhost:3001/api/band");
         const bands: Band[] = await response.json();
         setBands(bands);
