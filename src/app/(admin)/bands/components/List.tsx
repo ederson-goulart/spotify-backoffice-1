@@ -27,7 +27,8 @@ const TableRow = ({ band }: { band: Band }) => {
   );
 };
 
-export default function ManageCSR() {
+export default function List() {
+  console.log("Sou um componente SSR ou CSR?");
   const [bands, setBands] = useState<Band[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -50,42 +51,33 @@ export default function ManageCSR() {
     fetchBands();
   }, []);
 
-  if (loading) {
-    return <Loading></Loading>;
-  }
-
   return (
-    <section className="overflow-x-auto p-4">
-      <header className="flex justify-end mb-4">
-        <Button>Adicionar</Button>
-      </header>
-      <table className="min-w-full border border-gray-200 rounded-sm overflow-hidden">
-        <thead className="bg-gray-800 text-gray-50 uppercase text-left text-sm">
+    <table className="min-w-full border border-gray-200 rounded-sm overflow-hidden">
+      <thead className="bg-gray-800 text-gray-50 uppercase text-left text-sm">
+        <tr>
+          <th scope="col" className="px-6 py-3">
+            Nome
+          </th>
+          <th scope="col" className="px-6 py-3">
+            Descrição
+          </th>
+          <th scope="col" className="px-6 py-3">
+            Status
+          </th>
+          <th scope="col" className="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {Array.isArray(bands) && bands.length > 0 ? (
+          bands.map((band) => <TableRow key={band.id} band={band} />)
+        ) : (
           <tr>
-            <th scope="col" className="px-6 py-3">
-              Nome
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Descrição
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Status
-            </th>
-            <th scope="col" className="px-6 py-3"></th>
+            <td colSpan={4} className="text-center text-gray-500 py-4">
+              {loading ? <Loading /> : "Nenhum registro encontrado"}
+            </td>
           </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {Array.isArray(bands) && bands.length > 0 ? (
-            bands.map((band) => <TableRow key={band.id} band={band} />)
-          ) : (
-            <tr>
-              <td colSpan={3} className="text-center text-gray-500 py-4">
-                Nenhum registro encontrado
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+        )}
+      </tbody>
+    </table>
   );
 }
