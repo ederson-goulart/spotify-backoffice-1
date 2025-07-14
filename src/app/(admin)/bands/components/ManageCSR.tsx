@@ -3,6 +3,7 @@
 import Button from "@/app/components/Button";
 import { Band } from "../../../../../generated/prisma";
 import { useEffect, useState } from "react";
+import Loading from "@/app/components/Loading";
 
 const TableRow = ({ band }: { band: Band }) => {
   return (
@@ -28,15 +29,15 @@ const TableRow = ({ band }: { band: Band }) => {
 
 export default function ManageCSR() {
   const [bands, setBands] = useState<Band[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchBands = async () => {
       try {
-        // TODO: loading
         const response = await fetch("http://localhost:3001/api/band");
         const bands: Band[] = await response.json();
-
         setBands(bands);
+        setLoading(false);
       } catch (error: unknown) {
         console.log(error);
       }
@@ -44,6 +45,10 @@ export default function ManageCSR() {
 
     fetchBands();
   }, []);
+
+  if (loading) {
+    return <Loading></Loading>;
+  }
 
   return (
     <section className="overflow-x-auto p-4">
