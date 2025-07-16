@@ -5,6 +5,11 @@ import { Band } from "../../../../../generated/prisma";
 import { useEffect, useState } from "react";
 import Loading from "@/app/components/Loading";
 
+interface BandList {
+  currentPage: number;
+  data: Band[];
+}
+
 const TableRow = ({ band }: { band: Band }) => {
   return (
     <tr>
@@ -28,20 +33,16 @@ const TableRow = ({ band }: { band: Band }) => {
 };
 
 export default function List() {
-  console.log("Sou um componente SSR ou CSR?");
   const [bands, setBands] = useState<Band[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchBands = async () => {
       try {
-        await new Promise<boolean>((resolve) => {
-          setTimeout(() => resolve(true), 3000);
-        });
-
         const response = await fetch("http://localhost:3001/api/band");
-        const bands: Band[] = await response.json();
-        setBands(bands);
+        const bands: BandList = await response.json();
+        console.log(bands);
+        setBands(bands.data);
         setLoading(false);
       } catch (error: unknown) {
         console.log(error);

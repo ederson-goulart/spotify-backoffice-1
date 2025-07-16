@@ -11,8 +11,22 @@ import {
 import { CustomError } from "@/app/utils/CustomError";
 
 export async function GET() {
-  const bands = await prisma.band.findMany();
-  return Response.json(bands);
+  // skip (offset), take (limit)
+
+  const currentPage: number = 3; // página atual
+  const take: number = 10;
+  const skip: number = (currentPage - 1) * take;
+
+  const totalItems = await prisma.band.count();
+
+  const bands = await prisma.band.findMany({
+    skip,
+    take,
+    orderBy: { createdAt: "desc" },
+  });
+
+  const totalPages = Math.ceil(totalItems / take);
+  return Response.json({ currentPage, totalItems, totalPages, data: bands });
 }
 
 // FormData (abordagem)
