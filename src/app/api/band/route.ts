@@ -13,8 +13,8 @@ import { CustomError } from "@/app/utils/CustomError";
 export async function GET() {
   // skip (offset), take (limit)
 
-  const currentPage: number = 3; // página atual
-  const take: number = 10;
+  const currentPage: number = 7; // página atual
+  const take: number = 5;
   const skip: number = (currentPage - 1) * take;
 
   const totalItems = await prisma.band.count();
@@ -26,7 +26,10 @@ export async function GET() {
   });
 
   const totalPages = Math.ceil(totalItems / take);
-  return Response.json({ currentPage, totalItems, totalPages, data: bands });
+  return Response.json({
+    pagination: { currentPage, totalItems, totalPages },
+    bands,
+  });
 }
 
 // FormData (abordagem)

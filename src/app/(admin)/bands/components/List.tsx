@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import Loading from "@/app/components/Loading";
 
 interface BandList {
-  currentPage: number;
-  data: Band[];
+  bands: Band[];
+  pagination: {
+    currentPage: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
 const TableRow = ({ band }: { band: Band }) => {
@@ -33,16 +37,16 @@ const TableRow = ({ band }: { band: Band }) => {
 };
 
 export default function List() {
-  const [bands, setBands] = useState<Band[] | null>(null);
+  const [data, setData] = useState<BandList | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchBands = async () => {
       try {
         const response = await fetch("http://localhost:3001/api/band");
-        const bands: BandList = await response.json();
-        console.log(bands);
-        setBands(bands.data);
+        const bandList: BandList = await response.json();
+        console.log(bandList);
+        setData(bandList);
         setLoading(false);
       } catch (error: unknown) {
         console.log(error);
@@ -53,32 +57,55 @@ export default function List() {
   }, []);
 
   return (
-    <table className="min-w-full border border-gray-200 rounded-sm overflow-hidden">
-      <thead className="bg-gray-800 text-gray-50 uppercase text-left text-sm">
-        <tr>
-          <th scope="col" className="px-6 py-3">
-            Nome
-          </th>
-          <th scope="col" className="px-6 py-3">
-            Descrição
-          </th>
-          <th scope="col" className="px-6 py-3">
-            Status
-          </th>
-          <th scope="col" className="px-6 py-3"></th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {Array.isArray(bands) && bands.length > 0 ? (
-          bands.map((band) => <TableRow key={band.id} band={band} />)
-        ) : (
+    <>
+      <table className="min-w-full border border-gray-200 rounded-sm overflow-hidden">
+        <thead className="bg-gray-800 text-gray-50 uppercase text-left text-sm">
           <tr>
-            <td colSpan={4} className="text-center text-gray-500 py-4">
-              {loading ? <Loading /> : "Nenhum registro encontrado"}
-            </td>
+            <th scope="col" className="px-6 py-3">
+              Nome
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Descrição
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Status
+            </th>
+            <th scope="col" className="px-6 py-3"></th>
           </tr>
-        )}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {Array.isArray(data?.bands) && data.bands.length > 0 ? (
+            data.bands.map((band) => <TableRow key={band.id} band={band} />)
+          ) : (
+            <tr>
+              <td colSpan={4} className="text-center text-gray-500 py-4">
+                {loading ? <Loading /> : "Nenhum registro encontrado"}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {data?.pagination.totalPages && (
+        <div className="flex justify-center mt-8 gap-2">
+          <button>Voltar</button>
+          {Array.from(
+            { length: data?.pagination.totalPages },
+            (_, i) => i + 1,
+          ).map((pageNumber) => {
+            const isActive = pageNumber === data.pagination.currentPage;
+            return (
+              <button
+                key={pageNumber}
+                className={`border rounded py-1 px-3 hover:cursor-pointer hover:bg-gray-800 hover:text-gray-50 ${isActive ? `bg-gray-800 text-gray-50` : ``}`}
+              >
+                {pageNumber}
+              </button>
+            );
+          })}
+          <button>Avançar</button>
+        </div>
+      )}
+    </>
   );
 }
