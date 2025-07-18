@@ -4,6 +4,7 @@ import Button from "@/app/components/Button";
 import { Band } from "../../../../../generated/prisma";
 import { useEffect, useState } from "react";
 import Loading from "@/app/components/Loading";
+import Pagination from "./Pagination";
 
 interface BandList {
   bands: Band[];
@@ -44,11 +45,12 @@ export default function List() {
   useEffect(() => {
     const fetchBands = async (page: number) => {
       try {
+        setData(null);
+        setLoading(true);
         const response = await fetch(
           `http://localhost:3001/api/band?page=${page}&take=4`,
         );
         const bandList: BandList = await response.json();
-        console.log(bandList);
         setData(bandList);
         setLoading(false);
       } catch (error: unknown) {
@@ -58,18 +60,6 @@ export default function List() {
 
     fetchBands(currentPage);
   }, [currentPage]);
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-
-  const handleNext = () => {
-    if (data?.pagination.totalPages) {
-      if (currentPage < data?.pagination.totalPages) {
-        setCurrentPage((prev) => prev + 1);
-      }
-    }
-  };
 
   return (
     <>
@@ -102,37 +92,11 @@ export default function List() {
       </table>
 
       {data?.pagination.totalPages && (
-        <div className="flex justify-center mt-8 gap-2">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="disabled:opacity-50 cursor-pointer"
-          >
-            Voltar
-          </button>
-          {Array.from(
-            { length: data?.pagination.totalPages },
-            (_, i) => i + 1,
-          ).map((pageNumber) => {
-            const isActive = pageNumber === data.pagination.currentPage;
-            return (
-              <button
-                key={pageNumber}
-                onClick={() => setCurrentPage(pageNumber)}
-                className={`border rounded py-1 px-3 hover:cursor-pointer hover:bg-gray-800 hover:text-gray-50 ${isActive ? `bg-gray-800 text-gray-50` : ``}`}
-              >
-                {pageNumber}
-              </button>
-            );
-          })}
-          <button
-            onClick={handleNext}
-            disabled={currentPage === data.pagination.totalPages}
-            className="disabled:opacity-50 cursor-pointer"
-          >
-            Avançar
-          </button>
-        </div>
+        <Pagination
+          totalPages={data?.pagination.totalPages}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       )}
     </>
   );
