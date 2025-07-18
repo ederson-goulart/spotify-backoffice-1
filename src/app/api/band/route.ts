@@ -9,12 +9,17 @@ import {
   PrismaClientKnownRequestError,
 } from "../../../../generated/prisma/runtime/library";
 import { CustomError } from "@/app/utils/CustomError";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const { searchParams } = url;
+  console.log(searchParams);
+
   // skip (offset), take (limit)
 
-  const currentPage: number = 7; // página atual
-  const take: number = 5;
+  const currentPage: number = parseInt(searchParams.get("page") || "1"); // página atual
+  const take: number = parseInt(searchParams.get("take") || "10");
   const skip: number = (currentPage - 1) * take;
 
   const totalItems = await prisma.band.count();

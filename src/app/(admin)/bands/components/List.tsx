@@ -39,11 +39,14 @@ const TableRow = ({ band }: { band: Band }) => {
 export default function List() {
   const [data, setData] = useState<BandList | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(6);
 
   useEffect(() => {
-    const fetchBands = async () => {
+    const fetchBands = async (page: number) => {
       try {
-        const response = await fetch("http://localhost:3001/api/band");
+        const response = await fetch(
+          `http://localhost:3001/api/band?page=${page}&take=4`,
+        );
         const bandList: BandList = await response.json();
         console.log(bandList);
         setData(bandList);
@@ -53,8 +56,20 @@ export default function List() {
       }
     };
 
-    fetchBands();
-  }, []);
+    fetchBands(currentPage);
+  }, [currentPage]);
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const handleNext = () => {
+    if (data?.pagination.totalPages) {
+      if (currentPage < data?.pagination.totalPages) {
+        setCurrentPage((prev) => prev + 1);
+      }
+    }
+  };
 
   return (
     <>
@@ -88,7 +103,13 @@ export default function List() {
 
       {data?.pagination.totalPages && (
         <div className="flex justify-center mt-8 gap-2">
-          <button>Voltar</button>
+          <button
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className="disabled:opacity-50 cursor-pointer"
+          >
+            Voltar
+          </button>
           {Array.from(
             { length: data?.pagination.totalPages },
             (_, i) => i + 1,
@@ -97,13 +118,20 @@ export default function List() {
             return (
               <button
                 key={pageNumber}
+                onClick={() => setCurrentPage(pageNumber)}
                 className={`border rounded py-1 px-3 hover:cursor-pointer hover:bg-gray-800 hover:text-gray-50 ${isActive ? `bg-gray-800 text-gray-50` : ``}`}
               >
                 {pageNumber}
               </button>
             );
           })}
-          <button>Avançar</button>
+          <button
+            onClick={handleNext}
+            disabled={currentPage === data.pagination.totalPages}
+            className="disabled:opacity-50 cursor-pointer"
+          >
+            Avançar
+          </button>
         </div>
       )}
     </>
