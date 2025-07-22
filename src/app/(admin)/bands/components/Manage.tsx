@@ -1,5 +1,6 @@
 import Button from "@/app/components/Button";
 import List from "./List";
+import Create from "./Create";
 
 export default function Manage() {
   return (
@@ -8,6 +9,7 @@ export default function Manage() {
         <Button>Adicionar</Button>
       </header>
       <List></List>
+      <Create></Create>
     </section>
   );
 }
