@@ -1,10 +1,15 @@
 import Button from "@/app/components/Button";
+import { Dispatch, SetStateAction } from "react";
 
-export default function Create() {
+interface Props {
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+export default function Create({ setIsOpen }: Props) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded shadow-lg w-full max-w-3xl relative">
         <button
+          onClick={() => setIsOpen(false)}
           className="absolute top-4 right-8 text-gray-500 hover:text-gray-800 text-4xl font-bold hover:cursor-pointer"
           arial-label="Fechar"
         >
