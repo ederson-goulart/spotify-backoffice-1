@@ -2,7 +2,7 @@
 
 import Button from "@/app/components/Button";
 import List from "./List";
-import Create from "./Create";
+import Create from "./CreateWMS";
 import { useState } from "react";
 
 export default function Manage() {
