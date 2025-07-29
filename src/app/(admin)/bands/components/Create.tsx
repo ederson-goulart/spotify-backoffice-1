@@ -29,10 +29,21 @@ export default function Create({ setIsOpen }: Props) {
     try {
       const bandJSON = JSON.stringify(band);
 
+      const bandURLEncoded = new URLSearchParams({
+        name: band.name,
+        slug: band.slug,
+        description: band.description || "",
+        status: band.status,
+      });
+
+      // console.log("Objeto: ", band);
+      // console.log("JSON: ", bandJSON);
+      // console.log("URL Encoded: ", bandURLEncoded.toString());
+
       const response = await fetch("http://localhost:3001/api/band", {
         method: "POST",
-        body: bandJSON,
-        headers: { "Content-Type": "application/json" },
+        body: bandURLEncoded.toString(),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
       const data = await response.json();

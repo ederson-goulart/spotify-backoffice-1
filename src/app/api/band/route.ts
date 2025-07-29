@@ -147,73 +147,33 @@ export async function GET(request: NextRequest) {
 // }
 
 // JSON (abordagem)
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    console.log("Recebemos os dados do Form: ", data);
-    if (typeof data === "object" && data !== null) {
-      // const validatedData = BandSchema.parse(data);
-      // TODO: Armazenar os dados no banco de dados
-      //return Response.json({ msg: "JSON (único)", validatedData });
-      return Response.json({ msg: "JSON (único)", data });
-    } else {
-      return Response.json(
-        { error: "Dados encaminhados em um formato inválido" },
-        { status: 400 },
-      );
-    }
-  } catch (error: unknown) {
-    if (error instanceof SyntaxError) {
-      console.error(
-        "Erro de sintaxe ao ler o JSON do Body da requisição",
-        error.message,
-      );
-      return Response.json(
-        { error: "Conteúdo (body) da requisição está inválido!" },
-        { status: 400 },
-      );
-    }
-
-    if (error instanceof z.ZodError) {
-      return Response.json(
-        { error: "Erro de validação", details: error.issues },
-        { status: 400 },
-      );
-    }
-
-    console.log("Erro desconhecido: ", error);
-    return Response.json(
-      { error: "Erro desconhecido (erro interno do servidor)" },
-      { status: 500 },
-    );
-  }
-}
-
-// URL Enconded (abordagem)
 // export async function POST(request: Request) {
 //   try {
-//     const bodyText = await request.text();
-//     const params = new URLSearchParams(bodyText);
-//     const name = params.get("name");
-//     const slug = params.get("slug");
-//     const description = params.get("description");
-//     const status = params.get("status");
-
-//     // Validação dos dados
-//     const validatedData = BandSchema.parse({
-//       name: name,
-//       slug: slug,
-//       description: description || "",
-//       status: status,
-//     });
-
-//     // TODO: Armazenar os dados no banco de dados
-
-//     return Response.json({
-//       msg: "URL Encoded",
-//       validatedData,
-//     });
+//     const data = await request.json();
+//     console.log("Recebemos os dados do Form: ", data);
+//     if (typeof data === "object" && data !== null) {
+//       // const validatedData = BandSchema.parse(data);
+//       // TODO: Armazenar os dados no banco de dados
+//       //return Response.json({ msg: "JSON (único)", validatedData });
+//       return Response.json({ msg: "JSON (único)", data });
+//     } else {
+//       return Response.json(
+//         { error: "Dados encaminhados em um formato inválido" },
+//         { status: 400 },
+//       );
+//     }
 //   } catch (error: unknown) {
+//     if (error instanceof SyntaxError) {
+//       console.error(
+//         "Erro de sintaxe ao ler o JSON do Body da requisição",
+//         error.message,
+//       );
+//       return Response.json(
+//         { error: "Conteúdo (body) da requisição está inválido!" },
+//         { status: 400 },
+//       );
+//     }
+
 //     if (error instanceof z.ZodError) {
 //       return Response.json(
 //         { error: "Erro de validação", details: error.issues },
@@ -228,6 +188,51 @@ export async function POST(request: Request) {
 //     );
 //   }
 // }
+
+// URL Enconded (abordagem)
+export async function POST(request: Request) {
+  try {
+    const bodyText = await request.text();
+    const params = new URLSearchParams(bodyText);
+    const name = params.get("name");
+    const slug = params.get("slug");
+    const description = params.get("description");
+    const status = params.get("status");
+
+    // Validação dos dados
+    // const validatedData = BandSchema.parse({
+    //   name: name,
+    //   slug: slug,
+    //   description: description || "",
+    //   status: status,
+    // });
+
+    // TODO: Armazenar os dados no banco de dados
+
+    // return Response.json({
+    //   msg: "URL Encoded",
+    //   validatedData,
+    // });
+
+    return Response.json({
+      msg: "URL Encoded",
+      data: { name, slug, description, status },
+    });
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return Response.json(
+        { error: "Erro de validação", details: error.issues },
+        { status: 400 },
+      );
+    }
+
+    console.log("Erro desconhecido: ", error);
+    return Response.json(
+      { error: "Erro desconhecido (erro interno do servidor)" },
+      { status: 500 },
+    );
+  }
+}
 
 export function PUT() {
   return Response.json({ msg: "API Rest - Método PUT" });
