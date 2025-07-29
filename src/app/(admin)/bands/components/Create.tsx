@@ -25,9 +25,21 @@ export default function Create({ setIsOpen }: Props) {
 
   console.log(formState.errors);
 
-  const onSubmit = (data: BandFormData) => {
-    console.log("Dados válidos, podemos enviar o formulário: ", data);
-    // Envio de dados para API
+  const onSubmit = async (band: BandFormData) => {
+    try {
+      const bandJSON = JSON.stringify(band);
+
+      const response = await fetch("http://localhost:3001/api/band", {
+        method: "POST",
+        body: bandJSON,
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      console.log("Resposta: ", data);
+    } catch (e: unknown) {
+      console.error("Error: ", e);
+    }
   };
 
   return (
