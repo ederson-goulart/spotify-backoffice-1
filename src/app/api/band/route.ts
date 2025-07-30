@@ -38,113 +38,110 @@ export async function GET(request: NextRequest) {
 }
 
 // FormData (abordagem)
-// export async function POST(request: Request) {
-//   try {
-//     const formData = await request.formData();
-//     console.log(formData);
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
 
-//     const data = {
-//       name: formData.get("name"),
-//       slug: formData.get("slug"),
-//       description: formData.get("description") || "",
-//       status: formData.get("status"),
-//       cover: formData.get("cover"),
-//     };
+    const cover = formData.getAll("cover") as File[];
 
-//     const validatedData = BandSchema.parse(data);
+    const data = {
+      name: formData.get("name"),
+      slug: formData.get("slug"),
+      description: formData.get("description") || "",
+      status: formData.get("status"),
+      cover,
+    };
 
-//     // TODO: Verificar se o registro já existe!
-//     const bandExists = await prisma.band.findFirst({
-//       where: {
-//         name: validatedData.name,
-//       },
-//     });
+    const validatedData = BandSchema.parse(data);
 
-//     // truthy, falsy
-//     if (bandExists) {
-//       throw new CustomError("Banda já cadastrada", 409);
-//     }
+    // TODO: Verificar se o registro já existe!
+    const bandExists = await prisma.band.findFirst({
+      where: {
+        name: validatedData.name,
+      },
+    });
 
-//     if (!(data.cover instanceof File)) {
-//       throw new CustomError("Tipo inválido de arquivo", 400);
-//     }
+    // truthy, falsy
+    if (bandExists) {
+      throw new CustomError("Banda já cadastrada", 409);
+    }
 
-//     const arrayBuffer = await data.cover.arrayBuffer();
-//     const buffer = Buffer.from(arrayBuffer);
+    const arrayBuffer = await data.cover[0].arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-//     const uploadDir = path.join(process.cwd(), "public", "uploads");
-//     await mkdir(uploadDir, { recursive: true });
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
 
-//     // define um nome único para o arquivo:
-//     const uniqueName = crypto.randomUUID();
-//     const extension = path.extname(data.cover.name);
-//     const fileName = `${uniqueName}${extension}`;
+    // define um nome único para o arquivo:
+    const uniqueName = crypto.randomUUID();
+    const extension = path.extname(data.cover[0].name);
+    const fileName = `${uniqueName}${extension}`;
 
-//     const filePath = path.join(uploadDir, fileName);
-//     await writeFile(filePath, buffer);
+    const filePath = path.join(uploadDir, fileName);
+    await writeFile(filePath, buffer);
 
-//     // Inserir os dados no banco de dados
-//     const insertedItem = await prisma.band.create({
-//       data: {
-//         name: validatedData.name,
-//         slug: validatedData.slug,
-//         description: validatedData.description,
-//         status: validatedData.status,
-//         coverUrl: fileName,
-//       },
-//     });
+    // Inserir os dados no banco de dados
+    const insertedItem = await prisma.band.create({
+      data: {
+        name: validatedData.name,
+        slug: validatedData.slug,
+        description: validatedData.description,
+        status: validatedData.status,
+        coverUrl: fileName,
+      },
+    });
 
-//     return Response.json({
-//       msg: "FormData",
-//       insertedItem,
-//       filePath: `/uploads/${data.cover.name}`,
-//     });
-//   } catch (error: unknown) {
-//     console.error("Erro capturado: ", error);
+    return Response.json({
+      msg: "FormData",
+      insertedItem,
+      filePath: `/uploads/${data.cover[0].name}`,
+    });
+  } catch (error: unknown) {
+    console.error("Erro capturado: ", error);
 
-//     if (error instanceof z.ZodError) {
-//       return Response.json(
-//         { error: "Erro de validação", details: error.issues },
-//         { status: 400 },
-//       );
-//     }
+    if (error instanceof z.ZodError) {
+      return Response.json(
+        { error: "Erro de validação", details: error.issues },
+        { status: 400 },
+      );
+    }
 
-//     if (error instanceof PrismaClientInitializationError) {
-//       return Response.json(
-//         { error: "Erro de conexão com o banco de dados" },
-//         { status: 500 },
-//       );
-//     }
+    if (error instanceof PrismaClientInitializationError) {
+      return Response.json(
+        { error: "Erro de conexão com o banco de dados" },
+        { status: 500 },
+      );
+    }
 
-//     if (error instanceof PrismaClientKnownRequestError) {
-//       return Response.json({ error: error.message }, { status: 500 });
-//     }
+    if (error instanceof PrismaClientKnownRequestError) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
 
-//     if (error instanceof CustomError) {
-//       return Response.json(
-//         {
-//           error: error.message,
-//         },
-//         { status: error.statusCode },
-//       );
-//     }
+    if (error instanceof CustomError) {
+      return Response.json(
+        {
+          error: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
 
-//     if (error instanceof Error) {
-//       return Response.json(
-//         {
-//           error:
-//             "Erro interno do servidor. Solicite para equipe responsável a avaliação dos logs de erros.",
-//         },
-//         { status: 500 },
-//       );
-//     }
+    if (error instanceof Error) {
+      return Response.json(
+        {
+          error:
+            "Erro interno do servidor. Solicite para equipe responsável a avaliação dos logs de erros.",
+        },
+        { status: 500 },
+      );
+    }
 
-//     return Response.json(
-//       { error: "Erro desconhecido (erro interno do servidor)" },
-//       { status: 500 },
-//     );
-//   }
-// }
+    return Response.json(
+      { error: "Erro desconhecido (erro interno do servidor)" },
+      { status: 500 },
+    );
+  }
+}
 
 // JSON (abordagem)
 // export async function POST(request: Request) {
@@ -190,49 +187,49 @@ export async function GET(request: NextRequest) {
 // }
 
 // URL Enconded (abordagem)
-export async function POST(request: Request) {
-  try {
-    const bodyText = await request.text();
-    const params = new URLSearchParams(bodyText);
-    const name = params.get("name");
-    const slug = params.get("slug");
-    const description = params.get("description");
-    const status = params.get("status");
+// export async function POST(request: Request) {
+//   try {
+//     const bodyText = await request.text();
+//     const params = new URLSearchParams(bodyText);
+//     const name = params.get("name");
+//     const slug = params.get("slug");
+//     const description = params.get("description");
+//     const status = params.get("status");
 
-    // Validação dos dados
-    // const validatedData = BandSchema.parse({
-    //   name: name,
-    //   slug: slug,
-    //   description: description || "",
-    //   status: status,
-    // });
+//     // Validação dos dados
+//     // const validatedData = BandSchema.parse({
+//     //   name: name,
+//     //   slug: slug,
+//     //   description: description || "",
+//     //   status: status,
+//     // });
 
-    // TODO: Armazenar os dados no banco de dados
+//     // TODO: Armazenar os dados no banco de dados
 
-    // return Response.json({
-    //   msg: "URL Encoded",
-    //   validatedData,
-    // });
+//     // return Response.json({
+//     //   msg: "URL Encoded",
+//     //   validatedData,
+//     // });
 
-    return Response.json({
-      msg: "URL Encoded",
-      data: { name, slug, description, status },
-    });
-  } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      return Response.json(
-        { error: "Erro de validação", details: error.issues },
-        { status: 400 },
-      );
-    }
+//     return Response.json({
+//       msg: "URL Encoded",
+//       data: { name, slug, description, status },
+//     });
+//   } catch (error: unknown) {
+//     if (error instanceof z.ZodError) {
+//       return Response.json(
+//         { error: "Erro de validação", details: error.issues },
+//         { status: 400 },
+//       );
+//     }
 
-    console.log("Erro desconhecido: ", error);
-    return Response.json(
-      { error: "Erro desconhecido (erro interno do servidor)" },
-      { status: 500 },
-    );
-  }
-}
+//     console.log("Erro desconhecido: ", error);
+//     return Response.json(
+//       { error: "Erro desconhecido (erro interno do servidor)" },
+//       { status: 500 },
+//     );
+//   }
+// }
 
 export function PUT() {
   return Response.json({ msg: "API Rest - Método PUT" });

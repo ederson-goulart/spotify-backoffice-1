@@ -9,8 +9,28 @@ export const BandSchema = z.object({
   description: z.string().optional(),
   status: z.enum(["active", "inactive"]),
   cover: z
-    .custom<FileList>(
-      (fileList) => fileList instanceof FileList && fileList.length > 0,
+    // .custom<FileList>(
+    //   (fileList) => fileList instanceof FileList && fileList.length > 0,
+    // )
+    .custom<File[]>(
+      (fileList) => {
+        console.log("Dentro da função customizada do Zod: ", fileList);
+
+        // browser
+        const isFileList =
+          typeof FileList !== "undefined" &&
+          fileList instanceof FileList &&
+          fileList.length > 0;
+
+        // back (node)
+        const isArrayOfFiles =
+          Array.isArray(fileList) &&
+          fileList.length > 0 &&
+          fileList.every((file) => file instanceof File);
+
+        return isFileList || isArrayOfFiles;
+      },
+      { message: "Envie um arquivo válido." },
     )
     .refine((fileList) => fileList[0].size > 0, {
       message: "Arquivo é obrigatório",

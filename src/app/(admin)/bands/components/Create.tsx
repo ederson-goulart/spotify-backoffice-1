@@ -36,14 +36,29 @@ export default function Create({ setIsOpen }: Props) {
         status: band.status,
       });
 
+      const bandFormData = new FormData();
+
+      bandFormData.append("name", band.name);
+      bandFormData.append("slug", band.slug);
+      bandFormData.append("description", band.description || "");
+      bandFormData.append("status", band.status);
+
+      Array.from(band.cover).forEach((cover) => {
+        bandFormData.append("cover", cover);
+      });
+
+      // for (const [key, value] of bandFormData.entries()) {
+      //   console.log(key, value);
+      // }
+
       // console.log("Objeto: ", band);
       // console.log("JSON: ", bandJSON);
       // console.log("URL Encoded: ", bandURLEncoded.toString());
+      // console.log("FormData: ", bandFormData);
 
       const response = await fetch("http://localhost:3001/api/band", {
         method: "POST",
-        body: bandURLEncoded.toString(),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: bandFormData,
       });
 
       const data = await response.json();
