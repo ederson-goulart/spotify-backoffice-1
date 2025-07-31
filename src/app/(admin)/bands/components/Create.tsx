@@ -1,7 +1,8 @@
 import Button from "@/app/components/Button";
+import Loading from "@/app/components/Loading";
 import { BandSchema } from "@/app/schemas/band.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 
@@ -12,29 +13,18 @@ interface Props {
 type BandFormData = z.infer<typeof BandSchema>;
 
 export default function Create({ setIsOpen }: Props) {
-  // handleSubmit -> processa o envio do formulário
-  // formState -> estado do formulário
-  // register -> conecta os inputs do formulário ao React Hook Form
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const { register, handleSubmit, formState } = useForm<BandFormData>({
     resolver: zodResolver(BandSchema),
-    // resolver -> integra biblioteca de validação externa (zod, yup, joi, etc)
     defaultValues: {
       status: "active",
     },
   });
 
-  console.log(formState.errors);
-
   const onSubmit = async (band: BandFormData) => {
     try {
-      const bandJSON = JSON.stringify(band);
-
-      const bandURLEncoded = new URLSearchParams({
-        name: band.name,
-        slug: band.slug,
-        description: band.description || "",
-        status: band.status,
-      });
+      setIsLoading(true);
 
       const bandFormData = new FormData();
 
@@ -47,22 +37,14 @@ export default function Create({ setIsOpen }: Props) {
         bandFormData.append("cover", cover);
       });
 
-      // for (const [key, value] of bandFormData.entries()) {
-      //   console.log(key, value);
-      // }
-
-      // console.log("Objeto: ", band);
-      // console.log("JSON: ", bandJSON);
-      // console.log("URL Encoded: ", bandURLEncoded.toString());
-      // console.log("FormData: ", bandFormData);
-
       const response = await fetch("http://localhost:3001/api/band", {
         method: "POST",
         body: bandFormData,
       });
 
-      const data = await response.json();
-      console.log("Resposta: ", data);
+      console.log(response);
+      setTimeout(() => setIsLoading(false), 2000);
+      //setIsLoading(false);
     } catch (e: unknown) {
       console.error("Error: ", e);
     }
@@ -141,7 +123,16 @@ export default function Create({ setIsOpen }: Props) {
           </div>
 
           <div className="flex justify-end">
-            <Button>Adicionar</Button>
+            <Button
+              disabled={isLoading}
+              className="flex w-[120px] justify-center"
+            >
+              {isLoading ? (
+                <Loading width={20} height={20} showText={false} />
+              ) : (
+                "Adicionar"
+              )}
+            </Button>
           </div>
         </form>
       </div>
