@@ -91,11 +91,14 @@ export async function POST(request: Request) {
       },
     });
 
-    return Response.json({
-      msg: "FormData",
-      insertedItem,
-      filePath: `/uploads/${data.cover[0].name}`,
-    });
+    return Response.json(
+      {
+        msg: "FormData",
+        insertedItem,
+        filePath: `/uploads/${data.cover[0].name}`,
+      },
+      { status: 201 },
+    );
   } catch (error: unknown) {
     console.error("Erro capturado: ", error);
 
