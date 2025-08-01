@@ -48,7 +48,7 @@ export default function Create({ setIsOpen }: Props) {
       if (response.status === 201) {
         toast.success("Cadastro realizado com sucesso");
       } else if (response.status === 409) {
-        toast.error("Banda já cadastrada anteriormente");
+        toast.error("Banda já cadastrada anteriormente!");
       } else {
         throw new Error("Erro ao cadastrar a banda");
       }
@@ -156,7 +156,18 @@ export default function Create({ setIsOpen }: Props) {
           </form>
         </div>
       </div>
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          duration: 4000,
+          style: { padding: "24px" },
+          error: {
+            className: "bg-red-50!",
+          },
+          success: {
+            className: "bg-green-50!",
+          },
+        }}
+      />
     </>
   );
 }
