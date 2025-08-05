@@ -13,22 +13,22 @@ export default function Manage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  useEffect(() => {
-    const fetchBands = async (page: number) => {
-      try {
-        setData(null);
-        setLoading(true);
-        const response = await fetch(
-          `http://localhost:3001/api/band?page=${page}&take=10`,
-        );
-        const bandList: BandList = await response.json();
-        setData(bandList);
-        setLoading(false);
-      } catch (error: unknown) {
-        console.log(error);
-      }
-    };
+  const fetchBands = async (page: number = 1) => {
+    try {
+      setData(null);
+      setLoading(true);
+      const response = await fetch(
+        `http://localhost:3001/api/band?page=${page}&take=10`,
+      );
+      const bandList: BandList = await response.json();
+      setData(bandList);
+      setLoading(false);
+    } catch (error: unknown) {
+      console.log(error);
+    }
+  };
 
+  useEffect(() => {
     fetchBands(currentPage);
   }, [currentPage]);
 
@@ -43,7 +43,13 @@ export default function Manage() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       ></List>
-      {isOpen && <Create setIsOpen={setIsOpen}></Create>}
+      {isOpen && (
+        <Create
+          setIsOpen={setIsOpen}
+          onSuccess={() => fetchBands()}
+          setCurrentPage={setCurrentPage}
+        ></Create>
+      )}
     </section>
   );
 }
