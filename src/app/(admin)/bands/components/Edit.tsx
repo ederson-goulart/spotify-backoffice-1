@@ -2,12 +2,14 @@ import Button from "@/app/components/Button";
 import Loading from "@/app/components/Loading";
 import { BandSchema } from "@/app/schemas/band.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import toast from "react-hot-toast";
+import { Band } from "../../../../../generated/prisma";
 
 interface Props {
+  band: Band;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   onSuccess: () => void;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
@@ -15,7 +17,17 @@ interface Props {
 
 type BandFormData = z.infer<typeof BandSchema>;
 
-export default function Edit({ setIsOpen, onSuccess, setCurrentPage }: Props) {
+export default function Edit({
+  band,
+  setIsOpen,
+  onSuccess,
+  setCurrentPage,
+}: Props) {
+  useEffect(
+    () => console.log("Banda recebida no componente Edit: ", band),
+    [band],
+  );
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { register, handleSubmit, formState } = useForm<BandFormData>({

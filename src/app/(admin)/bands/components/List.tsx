@@ -21,7 +21,13 @@ export default function List({
   currentPage,
   setCurrentPage,
 }: Props) {
+  const [bandToEdit, setBandToEdit] = useState<Band | null>(null);
   const [editIsOpen, setEditIsOpen] = useState<boolean>(false);
+
+  const handleEditClick = (band: Band) => {
+    setBandToEdit(band);
+    setEditIsOpen(true);
+  };
 
   const TableRow = ({ band }: { band: Band }) => {
     return (
@@ -40,7 +46,7 @@ export default function List({
           </span>
         </td>
         <td className="text-right font-sm space-x-4 whitespace-nowrap">
-          <Button onClick={() => setEditIsOpen(true)}>Editar</Button>
+          <Button onClick={() => handleEditClick(band)}>Editar</Button>
           <Button>Excluir</Button>
         </td>
       </tr>
@@ -85,8 +91,9 @@ export default function List({
         />
       )}
 
-      {editIsOpen && (
+      {editIsOpen && bandToEdit && (
         <Edit
+          band={bandToEdit}
           setIsOpen={setEditIsOpen}
           onSuccess={() => {}}
           setCurrentPage={setCurrentPage}
