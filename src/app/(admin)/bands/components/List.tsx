@@ -41,7 +41,9 @@ export default function List({
             : band.description}
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
-          <span className="inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-green-800">
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded ${band.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+          >
             {band.status}
           </span>
         </td>

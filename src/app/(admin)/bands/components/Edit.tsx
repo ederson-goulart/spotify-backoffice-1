@@ -82,6 +82,7 @@ export default function Edit({
         name: band.name,
         slug: band.slug,
         description: band.description || "",
+        status: band.status,
       });
     }
   }, [band, reset]);
@@ -149,10 +150,18 @@ export default function Edit({
 
             <div>
               <span className="font-semibold text-sm">Status:</span>
-              <select className="w-full p-2 border rounded">
+              <select
+                {...register("status")}
+                className="w-full p-2 border rounded"
+              >
                 <option value="active">Ativo</option>
                 <option value="inactive">Inativo</option>
               </select>
+              {formState?.errors?.status && (
+                <p className="text-red-500 text-sm">
+                  {formState.errors.status.message}
+                </p>
+              )}
             </div>
 
             <div>
