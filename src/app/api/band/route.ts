@@ -238,8 +238,14 @@ export function PUT() {
   return Response.json({ msg: "API Rest - Método PUT" });
 }
 
-export function PATCH() {
-  return Response.json({ msg: "API Rest - Método PATCH" });
+export async function PATCH(request: Request) {
+  try {
+    const formData = await request.formData();
+    console.log("Recebendo os dados no Patch: ", formData);
+    return Response.json({ msg: "API Rest - Método PATCH" });
+  } catch (error: unknown) {
+    console.error("Erro capturado: ", error);
+  }
 }
 
 export function DELETE() {

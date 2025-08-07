@@ -1,6 +1,6 @@
 import Button from "@/app/components/Button";
 import Loading from "@/app/components/Loading";
-import { BandSchema } from "@/app/schemas/band.schema";
+import { BandPatchSchema } from "@/app/schemas/band.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,7 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-type BandFormData = z.infer<typeof BandSchema>;
+type BandFormData = z.infer<typeof BandPatchSchema>;
 
 export default function Edit({
   band,
@@ -27,7 +27,7 @@ export default function Edit({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { register, handleSubmit, formState, reset } = useForm<BandFormData>({
-    resolver: zodResolver(BandSchema),
+    resolver: zodResolver(BandPatchSchema),
     defaultValues: {
       status: "active",
     },
@@ -44,12 +44,13 @@ export default function Edit({
       bandFormData.append("description", band.description || "");
       bandFormData.append("status", band.status);
 
+      /*
       Array.from(band.cover).forEach((cover) => {
         bandFormData.append("cover", cover);
       });
-
+      */
       const response = await fetch("http://localhost:3001/api/band", {
-        method: "POST",
+        method: "PATCH",
         body: bandFormData,
       });
 
@@ -176,6 +177,11 @@ export default function Edit({
                     className="w-full h-full object-cover"
                   />
                 </div>
+                {formState?.errors?.cover && (
+                  <p className="text-red-500 text-sm">
+                    {formState.errors.cover.message}
+                  </p>
+                )}
               </div>
             </div>
 
