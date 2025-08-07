@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import toast from "react-hot-toast";
 import { Band } from "../../../../../generated/prisma";
+import Image from "next/image";
 
 interface Props {
   band: Band;
@@ -23,14 +24,9 @@ export default function Edit({
   onSuccess,
   setCurrentPage,
 }: Props) {
-  useEffect(
-    () => console.log("Banda recebida no componente Edit: ", band),
-    [band],
-  );
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { register, handleSubmit, formState } = useForm<BandFormData>({
+  const { register, handleSubmit, formState, reset } = useForm<BandFormData>({
     resolver: zodResolver(BandSchema),
     defaultValues: {
       status: "active",
@@ -79,6 +75,16 @@ export default function Edit({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (band) {
+      reset({
+        name: band.name,
+        slug: band.slug,
+        description: band.description || "",
+      });
+    }
+  }, [band, reset]);
 
   return (
     <>
@@ -142,6 +148,30 @@ export default function Edit({
             </div>
 
             <div>
+              <span className="font-semibold text-sm">Status:</span>
+              <select className="w-full p-2 border rounded">
+                <option value="active">Ativo</option>
+                <option value="inactive">Inativo</option>
+              </select>
+            </div>
+
+            <div>
+              <span className="font-semibold text-sm">Capa atual:</span>
+              <div className="space-y-2">
+                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                  <Image
+                    src={`/uploads/${band.coverUrl}`}
+                    alt="Capa atual"
+                    width={420}
+                    height={420}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 
+              <div>
               <span className="font-semibold text-sm">Capa:</span>
               <input
                 {...register("cover")}
@@ -155,6 +185,7 @@ export default function Edit({
                 </p>
               )}
             </div>
+            */}
 
             <div className="flex justify-end">
               <Button
