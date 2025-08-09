@@ -25,9 +25,11 @@ export default function Edit({
   setCurrentPage,
 }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [changeCover, setChangeCover] = useState<boolean>(false);
 
   const { register, handleSubmit, formState, reset } = useForm<BandFormData>({
     resolver: zodResolver(BandPatchSchema),
+    shouldUnregister: true,
     defaultValues: {
       status: "active",
     },
@@ -44,11 +46,12 @@ export default function Edit({
       bandFormData.append("description", band.description || "");
       bandFormData.append("status", band.status);
 
-      /*
-      Array.from(band.cover).forEach((cover) => {
-        bandFormData.append("cover", cover);
-      });
-      */
+      if (band.cover) {
+        Array.from(band.cover).forEach((cover) => {
+          bandFormData.append("cover", cover);
+        });
+      }
+
       const response = await fetch("http://localhost:3001/api/band", {
         method: "PATCH",
         body: bandFormData,
@@ -177,30 +180,31 @@ export default function Edit({
                     className="w-full h-full object-cover"
                   />
                 </div>
+              </div>
+              <a href="#" onClick={() => setChangeCover(true)}>
+                Alterar capa
+              </a>
+            </div>
+
+            {changeCover && (
+              <div>
+                <span className="font-semibold text-sm">Capa:</span>
+                <input
+                  {...register("cover")}
+                  type="file"
+                  accept=".png, .jpg, .jpeg"
+                  className="w-full border rounded file:p-2 file:bg-gray-200"
+                ></input>
+                <a href="#" onClick={() => setChangeCover(false)}>
+                  Cancelar - Manter a capa atual
+                </a>
                 {formState?.errors?.cover && (
                   <p className="text-red-500 text-sm">
                     {formState.errors.cover.message}
                   </p>
                 )}
               </div>
-            </div>
-
-            {/* 
-              <div>
-              <span className="font-semibold text-sm">Capa:</span>
-              <input
-                {...register("cover")}
-                type="file"
-                accept=".png, .jpg, .jpeg"
-                className="w-full border rounded file:p-2 file:bg-gray-200"
-              ></input>
-              {formState?.errors?.cover && (
-                <p className="text-red-500 text-sm">
-                  {formState.errors.cover.message}
-                </p>
-              )}
-            </div>
-            */}
+            )}
 
             <div className="flex justify-end">
               <Button
