@@ -31,6 +31,7 @@ export default function Edit({
     resolver: zodResolver(BandPatchSchema),
     shouldUnregister: true,
     defaultValues: {
+      id: band.id,
       status: "active",
     },
   });
@@ -41,6 +42,7 @@ export default function Edit({
 
       const bandFormData = new FormData();
 
+      bandFormData.append("id", band.id);
       bandFormData.append("name", band.name);
       bandFormData.append("slug", band.slug);
       bandFormData.append("description", band.description || "");
@@ -109,6 +111,7 @@ export default function Edit({
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-3"
           >
+            <input {...register("id")} type="hidden" />
             <div>
               <span className="font-semibold text-sm">Nome:</span>
               <input

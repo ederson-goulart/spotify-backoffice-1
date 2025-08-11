@@ -42,7 +42,11 @@ export const BandSchema = z.object({
   cover: coverValidation,
 });
 
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const BandPatchSchema = BandSchema.extend({
+  id: z.string("ID inválido").regex(uuidRegex, "ID inválido"),
   cover: coverValidation.optional(),
 });
 
