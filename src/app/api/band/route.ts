@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import prisma from "../../../../lib/prisma";
 import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
-import { BandSchema } from "@/app/schemas/band.schema";
+import { BandPatchSchema, BandSchema } from "@/app/schemas/band.schema";
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
@@ -241,10 +241,47 @@ export function PUT() {
 export async function PATCH(request: Request) {
   try {
     const formData = await request.formData();
-    console.log("Recebendo os dados no Patch: ", formData);
-    return Response.json({ msg: "API Rest - Método PATCH" });
+
+    // Validação pelo Zod
+    const data = {
+      id: formData.get("id"),
+      name: formData.get("name"),
+      slug: formData.get("slug"),
+      description: formData.get("description"),
+      status: formData.get("status"),
+    };
+    const validatedData = BandPatchSchema.parse(data);
+
+    // Update
+    const updatedItem = await prisma.band.update({
+      where: {
+        id: validatedData.id,
+      },
+      data: {
+        name: validatedData.name,
+        slug: validatedData.slug,
+        description: validatedData.description,
+        status: validatedData.status,
+      },
+    });
+
+    return Response.json(
+      { msg: "Registro Atualizado", data: updatedItem },
+      { status: 200 },
+    );
   } catch (error: unknown) {
     console.error("Erro capturado: ", error);
+
+    if (error instanceof PrismaClientKnownRequestError) {
+      return Response.json(
+        { error: "Registro não encontrado" },
+        { status: 404 },
+      );
+    }
+    return Response.json(
+      { error: "Erro desconhecido (erro interno do servidor)" },
+      { status: 500 },
+    );
   }
 }
 

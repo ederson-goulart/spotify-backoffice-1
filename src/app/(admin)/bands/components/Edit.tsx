@@ -59,15 +59,15 @@ export default function Edit({
         body: bandFormData,
       });
 
-      if (response.status === 201) {
-        toast.success("Cadastro realizado com sucesso");
+      if (response.status === 200) {
+        toast.success("Banda atualizada com sucesso");
         onSuccess();
         setCurrentPage(1);
         setIsOpen(false);
-      } else if (response.status === 409) {
-        toast.error("Banda já cadastrada anteriormente!");
+      } else if (response.status === 404) {
+        throw new Error("Registro de banda não localizado");
       } else {
-        throw new Error("Erro ao cadastrar a banda");
+        throw new Error("Erro ao atualizar a banda");
       }
     } catch (e: unknown) {
       console.error("Error: ", e);
@@ -75,7 +75,7 @@ export default function Edit({
       if (e instanceof Error) {
         toast.error(e.message);
       } else {
-        toast.error("Erro ao cadastrar a banda");
+        toast.error("Erro ao atualizar a banda");
       }
     } finally {
       setIsLoading(false);
