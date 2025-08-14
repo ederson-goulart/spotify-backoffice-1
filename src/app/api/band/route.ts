@@ -241,16 +241,42 @@ export function PUT() {
 export async function PATCH(request: Request) {
   try {
     const formData = await request.formData();
-
     // Validação pelo Zod
-    const data = {
+    const data: Record<string, unknown> = {
       id: formData.get("id"),
       name: formData.get("name"),
       slug: formData.get("slug"),
       description: formData.get("description"),
       status: formData.get("status"),
     };
+
+    const coverFiles = formData.getAll("cover") as File[];
+    if (coverFiles.length > 0) {
+      data.cover = coverFiles;
+    }
+
     const validatedData = BandPatchSchema.parse(data);
+
+    // salvar o arquivo
+    let fileName: string | undefined;
+
+    if (data.cover && (data.cover as File[]).length > 0) {
+      const file = (data.cover as File[])[0];
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+      const uniqueName = crypto.randomUUID();
+      const extension = path.extname(file.name);
+      fileName = `${uniqueName}${extension}`;
+
+      const filePath = path.join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
+    }
+
+    console.log("fileName: ", fileName);
 
     // Update
     const updatedItem = await prisma.band.update({
@@ -262,6 +288,7 @@ export async function PATCH(request: Request) {
         slug: validatedData.slug,
         description: validatedData.description,
         status: validatedData.status,
+        ...(fileName && { coverUrl: fileName }),
       },
     });
 
