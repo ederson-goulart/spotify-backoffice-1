@@ -10,6 +10,22 @@ interface Props {
 }
 
 export default function Remove({ band, setIsOpen }: Props) {
+  const handleRemove = async () => {
+    const body = JSON.stringify({
+      id: band.id,
+    });
+
+    const response = await fetch("http://localhost:3001/api/band", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+
+    console.log(response);
+  };
+
   return (
     <>
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -28,7 +44,12 @@ export default function Remove({ band, setIsOpen }: Props) {
           <p>A operação não poderá ser desfeita!</p>
 
           <div className="flex justify-end mt-6">
-            <Button className="flex w-[120px] justify-center">Remover</Button>
+            <Button
+              className="flex w-[120px] justify-center"
+              onClick={() => handleRemove()}
+            >
+              Remover
+            </Button>
           </div>
         </div>
       </div>

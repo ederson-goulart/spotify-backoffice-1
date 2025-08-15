@@ -312,7 +312,9 @@ export async function PATCH(request: Request) {
   }
 }
 
-export function DELETE() {
+export async function DELETE(request: Request) {
+  const data = await request.json();
+  console.log("Chegamos até o método delete: ", data);
   return Response.json({ msg: "API Rest - Método DELETE" });
 }
 
