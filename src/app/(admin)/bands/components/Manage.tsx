@@ -42,6 +42,7 @@ export default function Manage() {
         loading={loading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
+        onSuccess={() => fetchBands()}
       ></List>
       {isOpen && (
         <Create
