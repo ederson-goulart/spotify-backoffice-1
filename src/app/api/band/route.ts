@@ -274,6 +274,8 @@ export async function PATCH(request: Request) {
 
       const filePath = path.join(uploadDir, fileName);
       await writeFile(filePath, buffer);
+
+      //TODO - remover a imagem
     }
 
     console.log("fileName: ", fileName);
@@ -313,9 +315,41 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const data = await request.json();
-  console.log("Chegamos até o método delete: ", data);
-  return Response.json({ msg: "API Rest - Método DELETE" });
+  try {
+    const data = await request.json();
+
+    const id = data.id;
+
+    if (id) {
+      // prisma
+      const deletedItem = await prisma.band.delete({
+        where: { id },
+      });
+
+      //TODO - remover a imagem
+
+      return Response.json(
+        { msg: "Registro removido", data: deletedItem },
+        { status: 200 },
+      );
+    } else {
+      throw new CustomError("ID não informado", 400); //400 bad request
+    }
+  } catch (error: unknown) {
+    console.error(error);
+
+    if (error instanceof CustomError) {
+      return Response.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    return Response.json(
+      { error: "Erro desconhecido (erro interno do servidor)" },
+      { status: 500 },
+    );
+  }
 }
 
 export function HEAD() {

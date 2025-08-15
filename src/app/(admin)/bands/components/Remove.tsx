@@ -1,6 +1,7 @@
 import Button from "@/app/components/Button";
 import { Dispatch, SetStateAction } from "react";
 import { Band } from "../../../../../generated/prisma";
+import toast from "react-hot-toast";
 
 interface Props {
   band: Band;
@@ -9,7 +10,12 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export default function Remove({ band, setIsOpen }: Props) {
+export default function Remove({
+  band,
+  onSuccess,
+  setCurrentPage,
+  setIsOpen,
+}: Props) {
   const handleRemove = async () => {
     const body = JSON.stringify({
       id: band.id,
@@ -23,7 +29,16 @@ export default function Remove({ band, setIsOpen }: Props) {
       body,
     });
 
-    console.log(response);
+    if (response.status === 200) {
+      toast.success("Banda removida com sucesso");
+      onSuccess();
+      setCurrentPage(1);
+      setIsOpen(false);
+    } else if (response.status === 400) {
+      throw new Error("O ID da Banda não foi informado");
+    } else {
+      throw new Error("Erro ao excluir a banda");
+    }
   };
 
   return (
