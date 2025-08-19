@@ -1,11 +1,21 @@
 "use server";
 
-export async function fetchBandsAction(page: number = 1) {
-  console.log("Executado no contexto do servidor");
-  // embora funcione, vamos adotar outra estratégia
-  const response = await fetch(
-    `http://localhost:3000/api/band?page=${page}&take=10`,
-  );
+import prisma from "../../../../../lib/prisma";
 
-  return response.json();
+export async function fetchBandsAction(page: number = 1, take: number = 10) {
+  console.log("Executado no contexto do servidor");
+
+  const skip: number = (page - 1) * take;
+  const totalItems = await prisma.band.count();
+  const bands = await prisma.band.findMany({
+    skip,
+    take,
+    orderBy: { createdAt: "desc" },
+  });
+
+  const totalPages = Math.ceil(totalItems / take);
+  return {
+    pagination: { currentPage: page, totalItems, totalPages },
+    bands,
+  };
 }
