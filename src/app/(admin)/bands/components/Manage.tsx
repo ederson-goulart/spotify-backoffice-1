@@ -5,6 +5,7 @@ import List from "./List";
 import Create from "./Create";
 import { useEffect, useState } from "react";
 import { BandList } from "../types/common";
+import { fetchBandsAction } from "../actions/fetchBandsAction";
 
 export default function Manage() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -17,14 +18,12 @@ export default function Manage() {
     try {
       setData(null);
       setLoading(true);
-      const response = await fetch(
-        `http://localhost:3001/api/band?page=${page}&take=10`,
-      );
-      const bandList: BandList = await response.json();
+      const bandList: BandList = await fetchBandsAction(page);
       setData(bandList);
-      setLoading(false);
     } catch (error: unknown) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
