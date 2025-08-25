@@ -6,8 +6,6 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png"];
 const coverValidation = z
   .custom<File[]>(
     (fileList) => {
-      console.log("Dentro da função customizada do Zod: ", fileList);
-
       // browser
       const isFileList =
         typeof FileList !== "undefined" &&
@@ -38,7 +36,7 @@ export const BandSchema = z.object({
   name: z.string().min(1, "O nome precisa ter pelo menos 1 caracter"),
   slug: z.string().min(1),
   description: z.string().optional(),
-  status: z.enum(["active", "inactive"]),
+  status: z.enum(["active", "inactive"]).default("active"),
   cover: coverValidation,
 });
 
