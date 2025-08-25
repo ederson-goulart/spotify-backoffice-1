@@ -1,7 +1,10 @@
 import Button from "@/app/components/Button";
 import Loading from "@/app/components/Loading";
-import { Dispatch, SetStateAction, useState } from "react";
-import { createBandAction } from "../actions/createBandAction";
+import { Dispatch, SetStateAction, useActionState, useState } from "react";
+import {
+  createBandAction,
+  CreateBandFormState,
+} from "../actions/createBandAction";
 
 interface Props {
   setIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -9,9 +12,13 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
+const INITIAL_STATE: CreateBandFormState = { ok: false };
+
 export default function Create({ setIsOpen }: Props) {
   const [isLoading] = useState<boolean>(false);
+  const [state, formAction] = useActionState(createBandAction, INITIAL_STATE);
 
+  console.log("Estado Atualizado: ", state);
   return (
     <>
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -26,7 +33,7 @@ export default function Create({ setIsOpen }: Props) {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Cadastrar Banda
           </h2>
-          <form action={createBandAction} className="flex flex-col gap-3">
+          <form action={formAction} className="flex flex-col gap-3">
             <div>
               <span className="font-semibold text-sm">Nome:</span>
               <input
