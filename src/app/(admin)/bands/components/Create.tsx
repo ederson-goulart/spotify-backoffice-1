@@ -42,6 +42,11 @@ export default function Create({ setIsOpen }: Props) {
                 placeholder="Legião Urbana"
                 className="w-full p-2 border rounded"
               ></input>
+              {state?.errors?.name && (
+                <p className="text-red-500 text-sm">
+                  {state.errors.name.errors.join(", ")}
+                </p>
+              )}
             </div>
 
             <div>
@@ -52,6 +57,11 @@ export default function Create({ setIsOpen }: Props) {
                 placeholder="legiao-urbana"
                 className="w-full p-2 border rounded"
               ></input>
+              {state?.errors?.slug && (
+                <p className="text-red-500 text-sm">
+                  {state.errors.slug.errors.join(", ")}
+                </p>
+              )}
             </div>
 
             <div>
@@ -60,6 +70,11 @@ export default function Create({ setIsOpen }: Props) {
                 name="description"
                 className="w-full p-2 border rounded block"
               ></textarea>
+              {state?.errors?.description && (
+                <p className="text-red-500 text-sm">
+                  {state.errors.description.errors.join(", ")}
+                </p>
+              )}
             </div>
 
             <div>
@@ -70,6 +85,11 @@ export default function Create({ setIsOpen }: Props) {
                 accept=".png, .jpg, .jpeg"
                 className="w-full border rounded file:p-2 file:bg-gray-200"
               ></input>
+              {state?.errors?.cover && (
+                <p className="text-red-500 text-sm">
+                  {state.errors.cover.errors.join(", ")}
+                </p>
+              )}
             </div>
 
             <div className="flex justify-end">

@@ -1,11 +1,12 @@
 "use server";
 
 import { BandSchema } from "@/app/schemas/band.schema";
+import { treeifyError } from "zod/v4";
 
 export type CreateBandFormState = {
   ok: boolean;
   message?: string;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, { errors: string[] } | undefined>;
 };
 
 export async function createBandAction(
@@ -26,7 +27,12 @@ export async function createBandAction(
   const validatedData = BandSchema.safeParse(data);
 
   if (!validatedData.success) {
-    return { ok: false, message: "Verifique os campos." };
+    const treeErrors = treeifyError(validatedData.error);
+    return {
+      ok: false,
+      message: "Verifique os campos.",
+      errors: treeErrors.properties,
+    };
   }
 
   return { ok: true, message: "Banda criada com sucesso!" };
