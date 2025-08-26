@@ -38,6 +38,7 @@ export default function Create({ setIsOpen }: Props) {
               <span className="font-semibold text-sm">Nome:</span>
               <input
                 name="name"
+                defaultValue={state?.values?.name}
                 type="text"
                 placeholder="Legião Urbana"
                 className="w-full p-2 border rounded"
@@ -53,6 +54,7 @@ export default function Create({ setIsOpen }: Props) {
               <span className="font-semibold text-sm">Slug:</span>
               <input
                 name="slug"
+                defaultValue={state?.values?.slug}
                 type="text"
                 placeholder="legiao-urbana"
                 className="w-full p-2 border rounded"
@@ -68,6 +70,7 @@ export default function Create({ setIsOpen }: Props) {
               <span className="font-semibold text-sm">Descrição:</span>
               <textarea
                 name="description"
+                defaultValue={state?.values?.description}
                 className="w-full p-2 border rounded block"
               ></textarea>
               {state?.errors?.description && (
