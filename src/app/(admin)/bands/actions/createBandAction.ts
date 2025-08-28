@@ -1,6 +1,8 @@
 "use server";
 
 import { BandSchema } from "@/app/schemas/band.schema";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { treeifyError, z } from "zod/v4";
 
 type BandFormValues = z.infer<typeof BandSchema>;
@@ -39,5 +41,19 @@ export async function createBandAction(
     };
   }
 
-  return { ok: true, message: "Banda criada com sucesso!" };
+  const arrayBuffer = await data.cover[0].arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadDir, { recursive: true });
+
+  // define um nome único para o arquivo:
+  const uniqueName = crypto.randomUUID();
+  const extension = path.extname(data.cover[0].name);
+  const fileName = `${uniqueName}${extension}`;
+
+  const filePath = path.join(uploadDir, fileName);
+  await writeFile(filePath, buffer);
+
+  return { ok: true, message: `Banda criada com sucesso! ${filePath}` };
 }
