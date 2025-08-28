@@ -1,10 +1,17 @@
 import Button from "@/app/components/Button";
 import Loading from "@/app/components/Loading";
-import { Dispatch, SetStateAction, useActionState, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useActionState,
+  useEffect,
+  useState,
+} from "react";
 import {
   createBandAction,
   CreateBandFormState,
 } from "../actions/createBandAction";
+import toast from "react-hot-toast";
 
 interface Props {
   setIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -12,13 +19,33 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const INITIAL_STATE: CreateBandFormState = { ok: false };
+const INITIAL_STATE: CreateBandFormState = { status: "idle", ok: false };
 
-export default function Create({ setIsOpen }: Props) {
+export default function Create({
+  setIsOpen,
+  onSuccess,
+  setCurrentPage,
+}: Props) {
   const [isLoading] = useState<boolean>(false);
   const [state, formAction] = useActionState(createBandAction, INITIAL_STATE);
 
-  console.log("Estado Atualizado: ", state);
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success(
+        state.message ? state.message : "Cadastro realizado com sucesso",
+      );
+
+      onSuccess();
+      setCurrentPage(1);
+      setIsOpen(false);
+    } else if (state.status === "error") {
+      toast.error(
+        state.message
+          ? state.message
+          : "Houve um erro na tentativa de registro da banda",
+      );
+    }
+  }, [state]);
   return (
     <>
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

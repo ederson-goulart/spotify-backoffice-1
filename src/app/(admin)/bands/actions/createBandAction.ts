@@ -9,6 +9,7 @@ import prisma from "../../../../../lib/prisma";
 type BandFormValues = z.infer<typeof BandSchema>;
 
 export type CreateBandFormState = {
+  status: "idle" | "loading" | "success" | "error";
   ok: boolean;
   message?: string;
   errors?: Record<string, { errors: string[] } | undefined>;
@@ -35,6 +36,7 @@ export async function createBandAction(
   if (!validatedData.success) {
     const treeErrors = treeifyError(validatedData.error);
     return {
+      status: "error",
       ok: false,
       message: "Verifique os campos.",
       errors: treeErrors.properties,
@@ -51,6 +53,7 @@ export async function createBandAction(
 
   if (bandExists) {
     return {
+      status: "error",
       ok: false,
       message: "Banda já cadastrada!",
       values: { ...data, status: "active" },
@@ -81,5 +84,5 @@ export async function createBandAction(
     },
   });
 
-  return { ok: true, message: `Banda criada com sucesso!` };
+  return { status: "success", ok: true, message: `Banda criada com sucesso!` };
 }
