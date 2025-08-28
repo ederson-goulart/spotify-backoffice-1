@@ -4,6 +4,7 @@ import { BandSchema } from "@/app/schemas/band.schema";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { treeifyError, z } from "zod/v4";
+import prisma from "../../../../../lib/prisma";
 
 type BandFormValues = z.infer<typeof BandSchema>;
 
@@ -41,6 +42,21 @@ export async function createBandAction(
     };
   }
 
+  // TODO: Verificar se o registro já existe!
+  const bandExists = await prisma.band.findFirst({
+    where: {
+      name: validatedData.data.name,
+    },
+  });
+
+  if (bandExists) {
+    return {
+      ok: false,
+      message: "Banda já cadastrada!",
+      values: { ...data, status: "active" },
+    };
+  }
+
   const arrayBuffer = await data.cover[0].arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -55,5 +71,15 @@ export async function createBandAction(
   const filePath = path.join(uploadDir, fileName);
   await writeFile(filePath, buffer);
 
-  return { ok: true, message: `Banda criada com sucesso! ${filePath}` };
+  await prisma.band.create({
+    data: {
+      name: validatedData.data.name,
+      slug: validatedData.data.slug,
+      description: validatedData.data.description,
+      status: validatedData.data.status,
+      coverUrl: fileName,
+    },
+  });
+
+  return { ok: true, message: `Banda criada com sucesso!` };
 }
