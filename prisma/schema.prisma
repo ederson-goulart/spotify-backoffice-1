@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+  binaryTargets = "linux-musl-openssl-3.0.x"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// nomes no singular seguindo PascalCase. Ex.: UserInfo
+model Band {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String? // no banco de dados coluna poderá ser null
+  status      Status   @default(active)
+  createdAt   DateTime @default(now()) @map("created_at") // camelCase no model -> snake_case no banco de dados
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  coverUrl    String?  @map("cover_url")
+
+  // Estabelecendo o relacionamento: 1 Band -> N Tracks
+  tracks Track[] @relation("BandTracks")
+
+  // nomes no plural seguindo snake_case. Ex.: user_infos
+  @@map("bands")
+}
+
+model Track {
+  id                String   @id @default(uuid()) @db.Uuid
+  title             String
+  slug              String   @unique
+  durationInSeconds Int      @map("duration_in_seconds")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Chave estrangeira (fk)
+  bandId String @map("band_id") @db.Uuid
+
+  // Relacionamento: Cada Track pertence a uma Band
+  band Band @relation("BandTracks", fields: [bandId], references: [id], onDelete: Cascade)
+
+  // Adiciona uma índice para melhorar a performance em consultas por bandas
+  @@index([bandId])
+  @@map("tracks")
+}
+
+enum Status {
+  active
+  inactive
+}
