@@ -4,13 +4,13 @@ networks:
     driver: bridge
 
 services:
-  spotify-backoffice:
-    container_name: spotify-backoffice
+  spotify-backofficep:
+    container_name: spotify-backofficep
     build:
       context: .
       dockerfile: Dockerfile
       target: dev
-    image: spotify-backoffice:latest
+    image: spotify-backofficep:latest
     command: sh -c "npm install && npm run dev"
     networks:
       - spotify-network

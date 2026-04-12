@@ -15,24 +15,24 @@ export default async function Indicator({ type }: Props) {
 
   if (type === TYPE.BANDS) {
     title = "Bandas";
-    //value = await prisma.band.count();
-    value = await new Promise<number>((resolve) => {
-      setTimeout(async () => {
-        const total = await prisma.band.count();
-        resolve(total);
-      }, 3000);
-    });
+    value = await prisma.band.count();
+    // value = await new Promise<number>((resolve) => {
+    //   setTimeout(async () => {
+    //     const total = await prisma.band.count();
+    //     resolve(total);
+    //   }, 3000);
+    // });
   }
 
   if (type === TYPE.TRACKS) {
     title = "Trilhas";
-    //value = await prisma.track.count();
-    value = await new Promise<number>((resolve) => {
-      setTimeout(async () => {
-        const total = await prisma.track.count();
-        resolve(total);
-      }, 6000);
-    });
+    value = await prisma.track.count();
+    // value = await new Promise<number>((resolve) => {
+    //   setTimeout(async () => {
+    //     const total = await prisma.track.count();
+    //     resolve(total);
+    //   }, 6000);
+    // });
   }
 
   return (
