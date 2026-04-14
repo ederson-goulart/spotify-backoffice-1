@@ -50,7 +50,7 @@ export default function Edit({
         bandId: trackData.bandId,
       });
 
-      const response = await fetch("http://localhost:3001/api/track", {
+      const response = await fetch("/api/track", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export default function Edit({
   useEffect(() => {
     const loadBands = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/band");
+        const response = await fetch("/api/band?take=1000");
         const data = await response.json();
         setBandsData(data.bands || []);
       } catch (error) {
@@ -92,10 +92,8 @@ export default function Edit({
       }
     };
 
-    if (bandsData.length === 0) {
-      loadBands();
-    }
-  }, [bandsData]);
+    loadBands();
+  }, []);
 
   useEffect(() => {
     if (track) {
@@ -205,6 +203,7 @@ export default function Edit({
                 Cancelar
               </Button>
               <Button
+                type="submit"
                 disabled={isLoading}
                 className="flex w-[120px] justify-center"
               >

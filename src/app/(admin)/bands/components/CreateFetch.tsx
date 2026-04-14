@@ -44,7 +44,7 @@ export default function CreateFetch({
         bandFormData.append("cover", cover);
       });
 
-      const response = await fetch("http://localhost:3001/api/band", {
+      const response = await fetch("/api/band", {
         method: "POST",
         body: bandFormData,
       });
@@ -150,6 +150,7 @@ export default function CreateFetch({
 
             <div className="flex justify-end">
               <Button
+                type="submit"
                 disabled={isLoading}
                 className="flex w-[120px] justify-center"
               >

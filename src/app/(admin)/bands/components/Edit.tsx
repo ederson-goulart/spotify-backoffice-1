@@ -54,7 +54,7 @@ export default function Edit({
         });
       }
 
-      const response = await fetch("http://localhost:3001/api/band", {
+      const response = await fetch("/api/band", {
         method: "PATCH",
         body: bandFormData,
       });
@@ -211,6 +211,7 @@ export default function Edit({
 
             <div className="flex justify-end">
               <Button
+                type="submit"
                 disabled={isLoading}
                 className="flex w-[120px] justify-center"
               >

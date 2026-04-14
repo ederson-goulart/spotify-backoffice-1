@@ -124,6 +124,7 @@ export default function Create({
 
             <div className="flex justify-end">
               <Button
+                type="submit"
                 disabled={isLoading}
                 className="flex w-[120px] justify-center"
               >
