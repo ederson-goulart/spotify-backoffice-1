@@ -9,9 +9,12 @@ import { StatsSkeleton } from "./components/StatsSkeleton";
 export const dynamic = "force-dynamic";
 
 async function AnalyticsData({ period }: { period: string }) {
+  const baseUrl = process.env.API_URL || "http://localhost:3000";
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/analytics/stats?period=${period}`,
-    { cache: "no-store" },
+    `${baseUrl}/api/analytics/stats?period=${period}`,
+    {
+      cache: "no-store",
+    },
   );
 
   if (!response.ok) {
