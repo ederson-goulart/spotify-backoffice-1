@@ -180,7 +180,6 @@ export default function Edit({
                     alt="Capa atual"
                     fill
                     className="object-cover"
-                    unoptimized
                   />
                 </div>
               </div>
