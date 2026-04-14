@@ -10,6 +10,11 @@ services:
       context: .
       dockerfile: Dockerfile
       target: build
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        MINIO_ENDPOINT_INTERNAL: ${MINIO_ENDPOINT_INTERNAL}
+        MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+        MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     image: spotify-backofficep-dev:latest
     command: ["npm", "run", "dev"]
     networks:

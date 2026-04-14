@@ -1,10 +1,14 @@
 "use server";
 
 import { BandSchema } from "@/app/schemas/band.schema";
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 import { treeifyError, z } from "zod/v4";
 import prisma from "../../../../../lib/prisma";
+import minio from "../../../../../lib/minio";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+
+const MINIO_BUCKET = process.env.MINIO_BUCKET || "uploads";
 
 type BandFormValues = z.infer<typeof BandSchema>;
 
@@ -63,16 +67,20 @@ export async function createBandAction(
   const arrayBuffer = await data.cover[0].arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-
   // define um nome único para o arquivo:
   const uniqueName = crypto.randomUUID();
   const extension = path.extname(data.cover[0].name);
-  const fileName = `${uniqueName}${extension}`;
+  const objectKey = `${uniqueName}${extension}`;
 
-  const filePath = path.join(uploadDir, fileName);
-  await writeFile(filePath, buffer);
+  await minio.send(
+    new PutObjectCommand({
+      Bucket: MINIO_BUCKET,
+      Key: objectKey,
+      Body: buffer,
+      ContentType: data.cover[0].type || "application/octet-stream",
+      ACL: "public-read",
+    }),
+  );
 
   await prisma.band.create({
     data: {
@@ -80,7 +88,7 @@ export async function createBandAction(
       slug: validatedData.data.slug,
       description: validatedData.data.description,
       status: validatedData.data.status,
-      coverUrl: fileName,
+      coverUrl: objectKey,
     },
   });
 

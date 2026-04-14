@@ -16,6 +16,45 @@
    ```
 4. Acesse a aplicação em `http://localhost:3001`.
 
+## Imagens no MinIO (covers)
+
+Este projeto armazena as imagens (capas) no **MinIO** no bucket público `uploads`.
+
+### Variáveis de ambiente (produção / Coolify)
+
+Configure no app do backoffice no Coolify:
+
+- **`MINIO_ENDPOINT_INTERNAL`**: endpoint interno na rede Docker (ex.: `http://minio:9000`)
+- **`MINIO_ACCESS_KEY`**: access key do MinIO (normalmente igual ao `MINIO_ROOT_USER`)
+- **`MINIO_SECRET_KEY`**: secret do MinIO (normalmente igual ao `MINIO_ROOT_PASSWORD`)
+- **`MINIO_BUCKET`**: `uploads`
+- **`NEXT_PUBLIC_MINIO_PUBLIC_BASE_URL`**: base URL pública do MinIO (ex.: `https://minio.seudominio.com`)
+- **`S3_FORCE_PATH_STYLE`**: (opcional) `true` (padrão). Use `false` somente se você souber que precisa de virtual-host-style.
+
+### Como a URL é montada no front
+
+- A UI usa a URL pública em:
+  - `src/app/utils/uploads.ts` (helper `getPublicUploadUrl`)
+- A imagem final fica assim:
+  - `${NEXT_PUBLIC_MINIO_PUBLIC_BASE_URL}/uploads/${coverUrl}`
+
+### Atenção: `next/image` e domínio do MinIO
+
+O `next/image` precisa permitir o host remoto do MinIO. Este projeto configura isso automaticamente a partir de `NEXT_PUBLIC_MINIO_PUBLIC_BASE_URL` em `next.config.ts`.
+
+Se você trocar o domínio do MinIO no Coolify, basta atualizar `NEXT_PUBLIC_MINIO_PUBLIC_BASE_URL` e redeployar.
+
+### Migração (opcional) de arquivos antigos do disco
+
+Se você tinha capas antigas em `public/uploads`, existe um script para subir esses arquivos para o MinIO **mantendo o mesmo nome do arquivo** (compatível com `coverUrl` antigo):
+
+```bash
+npm run migrate:uploads
+```
+
+Requisitos:
+- As variáveis `MINIO_ENDPOINT_INTERNAL`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` e `MINIO_BUCKET` precisam estar configuradas no ambiente onde você executa o script.
+
 ## Sistema de Métricas (Analytics)
 
 O sistema inclui um dashboard completo de analytics que rastreia automaticamente eventos de uso do aplicativo.
@@ -157,7 +196,9 @@ await trackDelete("band", "/admin/bands");
 
 1. Crie um novo app no Coolify e selecione o repositório `spotify-backoffice-prof`.
 2. Escolha a opção Docker Compose e aponte para `docker-compose.yaml`.
-3. No painel de variáveis de ambiente do Coolify, configure `DATABASE_URL` com a string de conexão do PostgreSQL de produção.
+3. No painel de variáveis de ambiente do Coolify, configure:
+   - `DATABASE_URL` com a string de conexão do PostgreSQL de produção
+   - variáveis do MinIO (ver seção **Imagens no MinIO**)
 4. Execute o deploy.
 
 ## Observações

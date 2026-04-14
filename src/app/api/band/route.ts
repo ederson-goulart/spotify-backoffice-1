@@ -1,7 +1,6 @@
 import path from "node:path";
 import crypto from "node:crypto";
 import prisma from "../../../../lib/prisma";
-import { mkdir, writeFile } from "node:fs/promises";
 import * as z from "zod/v4";
 import { BandPatchSchema, BandSchema } from "@/app/schemas/band.schema";
 import {
@@ -10,6 +9,10 @@ import {
 } from "../../../../generated/prisma/runtime/library";
 import { CustomError } from "@/app/utils/CustomError";
 import { NextRequest } from "next/server";
+import minio from "../../../../lib/minio";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+
+const MINIO_BUCKET = process.env.MINIO_BUCKET || "uploads";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -78,16 +81,20 @@ export async function POST(request: Request) {
     const arrayBuffer = await data.cover[0].arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
     // define um nome único para o arquivo:
     const uniqueName = crypto.randomUUID();
     const extension = path.extname(data.cover[0].name);
-    const fileName = `${uniqueName}${extension}`;
+    const objectKey = `${uniqueName}${extension}`;
 
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
+    await minio.send(
+      new PutObjectCommand({
+        Bucket: MINIO_BUCKET,
+        Key: objectKey,
+        Body: buffer,
+        ContentType: data.cover[0].type || "application/octet-stream",
+        ACL: "public-read",
+      }),
+    );
 
     // Inserir os dados no banco de dados
     const insertedItem = await prisma.band.create({
@@ -96,7 +103,7 @@ export async function POST(request: Request) {
         slug: validatedData.slug,
         description: validatedData.description,
         status: validatedData.status,
-        coverUrl: fileName,
+        coverUrl: objectKey,
       },
     });
 
@@ -114,7 +121,7 @@ export async function POST(request: Request) {
       JSON.stringify({
         msg: "FormData",
         insertedItem,
-        filePath: `/uploads/${data.cover[0].name}`,
+        objectKey,
       }),
       {
         status: 201,
@@ -319,7 +326,7 @@ export async function PATCH(request: Request) {
     const validatedData = BandPatchSchema.parse(data);
 
     // salvar o arquivo
-    let fileName: string | undefined;
+    let objectKey: string | undefined;
 
     if (data.cover && (data.cover as File[]).length > 0) {
       const file = (data.cover as File[])[0];
@@ -327,19 +334,27 @@ export async function PATCH(request: Request) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-
       const uniqueName = crypto.randomUUID();
       const extension = path.extname(file.name);
-      fileName = `${uniqueName}${extension}`;
+      objectKey = `${uniqueName}${extension}`;
 
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
+      await minio.send(
+        new PutObjectCommand({
+          Bucket: MINIO_BUCKET,
+          Key: objectKey,
+          Body: buffer,
+          ContentType: file.type || "application/octet-stream",
+          ACL: "public-read",
+        }),
+      );
 
       //TODO - remover a imagem
     }
 
-    console.log("fileName: ", fileName);
+    const existing = await prisma.band.findUnique({
+      where: { id: validatedData.id },
+      select: { coverUrl: true },
+    });
 
     // Update
     const updatedItem = await prisma.band.update({
@@ -351,9 +366,18 @@ export async function PATCH(request: Request) {
         slug: validatedData.slug,
         description: validatedData.description,
         status: validatedData.status,
-        ...(fileName && { coverUrl: fileName }),
+        ...(objectKey && { coverUrl: objectKey }),
       },
     });
+
+    if (objectKey && existing?.coverUrl && existing.coverUrl !== objectKey) {
+      await minio.send(
+        new DeleteObjectCommand({
+          Bucket: MINIO_BUCKET,
+          Key: existing.coverUrl,
+        }),
+      );
+    }
 
     // Track UPDATE event
     await prisma.analyticsEvent.create({
@@ -410,6 +434,15 @@ export async function DELETE(request: Request) {
     const id = data.id;
 
     if (id) {
+      const existing = await prisma.band.findUnique({
+        where: { id },
+        select: { id: true, coverUrl: true },
+      });
+
+      if (!existing) {
+        throw new CustomError("Registro não encontrado", 404);
+      }
+
       // prisma
       const deletedItem = await prisma.band.delete({
         where: { id },
@@ -426,6 +459,14 @@ export async function DELETE(request: Request) {
       });
 
       //TODO - remover a imagem
+      if (existing.coverUrl) {
+        await minio.send(
+          new DeleteObjectCommand({
+            Bucket: MINIO_BUCKET,
+            Key: existing.coverUrl,
+          }),
+        );
+      }
 
       return new Response(
         JSON.stringify({ msg: "Registro removido", data: deletedItem }),

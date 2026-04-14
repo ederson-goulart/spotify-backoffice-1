@@ -8,6 +8,7 @@ import { z } from "zod/v4";
 import toast from "react-hot-toast";
 import { Band } from "../../../../../generated/prisma";
 import Image from "next/image";
+import { getPublicUploadUrl } from "@/app/utils/uploads";
 
 interface Props {
   band: Band;
@@ -176,7 +177,7 @@ export default function Edit({
               <div className="space-y-2">
                 <div className="w-full h-48 rounded-lg overflow-hidden relative">
                   <Image
-                    src={`/uploads/${band.coverUrl}`}
+                    src={getPublicUploadUrl(band.coverUrl)}
                     alt="Capa atual"
                     fill
                     className="object-cover"
