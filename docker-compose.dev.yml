@@ -5,15 +5,19 @@ networks:
 
 services:
   spotify-backofficep:
-    container_name: spotify-backofficep
+    container_name: spotify-backofficep-dev
     build:
       context: .
       dockerfile: Dockerfile
-    image: spotify-backofficep:latest
-    command: ["npm", "run", "start"]
+      target: build
+    image: spotify-backofficep-dev:latest
+    command: ["npm", "run", "dev"]
     networks:
       - spotify-network
     ports:
-      - "3000:3000"
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
     env_file:
       - .env
