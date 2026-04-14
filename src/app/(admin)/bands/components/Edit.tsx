@@ -174,19 +174,23 @@ export default function Edit({
             <div>
               <span className="font-semibold text-sm">Capa atual:</span>
               <div className="space-y-2">
-                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                <div className="w-full h-48 rounded-lg overflow-hidden relative">
                   <Image
                     src={`/uploads/${band.coverUrl}`}
                     alt="Capa atual"
-                    width={420}
-                    height={420}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
               </div>
-              <a href="#" onClick={() => setChangeCover(true)}>
+              <button
+                type="button"
+                onClick={() => setChangeCover(true)}
+                className="text-blue-600 hover:underline"
+              >
                 Alterar capa
-              </a>
+              </button>
             </div>
 
             {changeCover && (
