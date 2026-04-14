@@ -21,7 +21,7 @@ export default function Remove({
       id: band.id,
     });
 
-    const response = await fetch("http://localhost:3001/api/band", {
+    const response = await fetch(`/api/band`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

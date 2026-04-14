@@ -23,7 +23,7 @@ export default function Remove({
       id: track.id,
     });
 
-    const response = await fetch("http://localhost:3001/api/track", {
+    const response = await fetch(`/api/track`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
