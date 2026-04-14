@@ -91,6 +91,16 @@ export async function POST(request: Request) {
       },
     });
 
+    // Track CREATE event
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "CREATE_BAND",
+        page: "/admin/bands",
+        action: "create",
+        metadata: { bandId: insertedItem.id, bandName: insertedItem.name },
+      },
+    });
+
     return Response.json(
       {
         msg: "FormData",
@@ -294,6 +304,16 @@ export async function PATCH(request: Request) {
       },
     });
 
+    // Track UPDATE event
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "UPDATE_BAND",
+        page: "/admin/bands",
+        action: "update",
+        metadata: { bandId: updatedItem.id, bandName: updatedItem.name },
+      },
+    });
+
     return Response.json(
       { msg: "Registro Atualizado", data: updatedItem },
       { status: 200 },
@@ -324,6 +344,16 @@ export async function DELETE(request: Request) {
       // prisma
       const deletedItem = await prisma.band.delete({
         where: { id },
+      });
+
+      // Track DELETE event
+      await prisma.analyticsEvent.create({
+        data: {
+          type: "DELETE_BAND",
+          page: "/admin/bands",
+          action: "delete",
+          metadata: { bandId: deletedItem.id, bandName: deletedItem.name },
+        },
       });
 
       //TODO - remover a imagem

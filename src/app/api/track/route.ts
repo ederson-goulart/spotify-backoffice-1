@@ -80,6 +80,16 @@ export async function POST(request: Request) {
       },
     });
 
+    // Track CREATE event
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "CREATE_TRACK",
+        page: "/admin/tracks",
+        action: "create",
+        metadata: { trackId: insertedItem.id, trackTitle: insertedItem.title },
+      },
+    });
+
     return Response.json(
       {
         msg: "Música criada com sucesso",
@@ -163,6 +173,16 @@ export async function PATCH(request: Request) {
       },
     });
 
+    // Track UPDATE event
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "UPDATE_TRACK",
+        page: "/admin/tracks",
+        action: "update",
+        metadata: { trackId: updatedItem.id, trackTitle: updatedItem.title },
+      },
+    });
+
     return Response.json(
       { msg: "Música atualizada com sucesso", data: updatedItem },
       { status: 200 },
@@ -197,6 +217,16 @@ export async function DELETE(request: Request) {
     if (id) {
       const deletedItem = await prisma.track.delete({
         where: { id },
+      });
+
+      // Track DELETE event
+      await prisma.analyticsEvent.create({
+        data: {
+          type: "DELETE_TRACK",
+          page: "/admin/tracks",
+          action: "delete",
+          metadata: { trackId: deletedItem.id, trackTitle: deletedItem.title },
+        },
       });
 
       return Response.json(

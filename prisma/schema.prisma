@@ -1,7 +1,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
-  binaryTargets = "linux-musl-openssl-3.0.x"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -49,4 +49,29 @@ model Track {
 enum Status {
   active
   inactive
+}
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  CREATE_BAND
+  UPDATE_BAND
+  DELETE_BAND
+  CREATE_TRACK
+  UPDATE_TRACK
+  DELETE_TRACK
+  ERROR
+}
+
+model AnalyticsEvent {
+  id        String                @id @default(uuid()) @db.Uuid
+  type      AnalyticsEventType
+  page      String                // ex: /admin/bands, /admin/tracks
+  action    String?               // ex: "create", "delete", "view"
+  metadata  Json?                 // dados flexíveis como user agent, referrer, erro details
+  timestamp DateTime              @default(now()) @map("created_at")
+
+  @@index([timestamp])
+  @@index([type])
+  @@index([page])
+  @@map("analytics_events")
 }

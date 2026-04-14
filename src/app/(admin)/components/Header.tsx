@@ -16,6 +16,7 @@ export default function Header() {
     { name: "Home", href: "/home" },
     { name: "Bandas", href: "/bands" },
     { name: "Trilhas", href: "/tracks" },
+    { name: "📊 Métricas", href: "/analytics" },
   ];
 
   return (
