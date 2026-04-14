@@ -32,10 +32,19 @@ export async function GET(request: NextRequest) {
   });
 
   const totalPages = Math.ceil(totalItems / take);
-  return Response.json({
-    pagination: { currentPage, totalItems, totalPages },
-    tracks,
-  });
+  return new Response(
+    JSON.stringify({
+      pagination: { currentPage, totalItems, totalPages },
+      tracks,
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+      },
+    },
+  );
 }
 
 export async function POST(request: Request) {
@@ -90,62 +99,110 @@ export async function POST(request: Request) {
       },
     });
 
-    return Response.json(
-      {
+    return new Response(
+      JSON.stringify({
         msg: "Música criada com sucesso",
         insertedItem,
+      }),
+      {
+        status: 201,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
       },
-      { status: 201 },
     );
   } catch (error: unknown) {
     console.error("Erro capturado: ", error);
 
     if (error instanceof z.ZodError) {
-      return Response.json(
-        { error: "Erro de validação", details: error.issues },
-        { status: 400 },
+      return new Response(
+        JSON.stringify({ error: "Erro de validação", details: error.issues }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
+        },
       );
     }
 
     if (error instanceof PrismaClientInitializationError) {
-      return Response.json(
-        { error: "Erro de conexão com o banco de dados" },
-        { status: 500 },
+      return new Response(
+        JSON.stringify({ error: "Erro de conexão com o banco de dados" }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
+        },
       );
     }
 
     if (error instanceof PrismaClientKnownRequestError) {
-      return Response.json({ error: error.message }, { status: 500 });
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      });
     }
 
     if (error instanceof CustomError) {
-      return Response.json(
-        {
+      return new Response(
+        JSON.stringify({
           error: error.message,
+        }),
+        {
+          status: error.statusCode,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
         },
-        { status: error.statusCode },
       );
     }
 
     if (error instanceof Error) {
-      return Response.json(
-        {
+      return new Response(
+        JSON.stringify({
           error:
             "Erro interno do servidor. Solicite para equipe responsável a avaliação dos logs de erros.",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
         },
-        { status: 500 },
       );
     }
 
-    return Response.json(
-      { error: "Erro desconhecido (erro interno do servidor)" },
-      { status: 500 },
+    return new Response(
+      JSON.stringify({ error: "Erro desconhecido (erro interno do servidor)" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      },
     );
   }
 }
 
 export function PUT() {
-  return Response.json({ msg: "API Rest - Método PUT" });
+  return new Response(JSON.stringify({ msg: "API Rest - Método PUT" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+    },
+  });
 }
 
 export async function PATCH(request: Request) {
@@ -183,27 +240,54 @@ export async function PATCH(request: Request) {
       },
     });
 
-    return Response.json(
-      { msg: "Música atualizada com sucesso", data: updatedItem },
-      { status: 200 },
+    return new Response(
+      JSON.stringify({
+        msg: "Música atualizada com sucesso",
+        data: updatedItem,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      },
     );
   } catch (error: unknown) {
     console.error("Erro capturado: ", error);
 
     if (error instanceof z.ZodError) {
-      return Response.json(
-        { error: "Erro de validação", details: error.issues },
-        { status: 400 },
+      return new Response(
+        JSON.stringify({ error: "Erro de validação", details: error.issues }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
+        },
       );
     }
 
     if (error instanceof PrismaClientKnownRequestError) {
-      return Response.json({ error: "Música não encontrada" }, { status: 404 });
+      return new Response(JSON.stringify({ error: "Música não encontrada" }), {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      });
     }
 
-    return Response.json(
-      { error: "Erro desconhecido (erro interno do servidor)" },
-      { status: 500 },
+    return new Response(
+      JSON.stringify({ error: "Erro desconhecido (erro interno do servidor)" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      },
     );
   }
 }
@@ -229,9 +313,18 @@ export async function DELETE(request: Request) {
         },
       });
 
-      return Response.json(
-        { msg: "Música removida com sucesso", data: deletedItem },
-        { status: 200 },
+      return new Response(
+        JSON.stringify({
+          msg: "Música removida com sucesso",
+          data: deletedItem,
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+          },
+        },
       );
     } else {
       throw new CustomError("ID não informado", 400);
@@ -240,23 +333,45 @@ export async function DELETE(request: Request) {
     console.error(error);
 
     if (error instanceof CustomError) {
-      return Response.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: error.statusCode,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      });
     }
 
-    return Response.json(
-      { error: "Erro desconhecido (erro interno do servidor)" },
-      { status: 500 },
+    return new Response(
+      JSON.stringify({ error: "Erro desconhecido (erro interno do servidor)" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+        },
+      },
     );
   }
 }
 
 export function HEAD() {
-  return Response.json({ msg: "API Rest - Método HEAD" });
+  return new Response(JSON.stringify({ msg: "API Rest - Método HEAD" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+    },
+  });
 }
 
 export function OPTIONS() {
-  return Response.json({ msg: "API Rest - Método OPTIONS" });
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "https://spot.eletrica.cloud",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  });
 }
