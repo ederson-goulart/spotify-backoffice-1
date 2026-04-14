@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import Indicator from "./components/Indicator";
 import IndicatorSkeleton from "./components/IndicatorSkeleton";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   return (
     <>

@@ -13,7 +13,7 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-type BandFormData = z.infer<typeof BandSchema>;
+type BandFormData = z.input<typeof BandSchema>;
 
 export default function CreateFetch({
   setIsOpen,
@@ -38,7 +38,7 @@ export default function CreateFetch({
       bandFormData.append("name", band.name);
       bandFormData.append("slug", band.slug);
       bandFormData.append("description", band.description || "");
-      bandFormData.append("status", band.status);
+      bandFormData.append("status", band.status || "active");
 
       Array.from(band.cover).forEach((cover) => {
         bandFormData.append("cover", cover);

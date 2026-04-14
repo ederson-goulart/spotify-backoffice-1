@@ -18,7 +18,7 @@ interface Props {
   bands?: Band[];
 }
 
-type TrackFormData = z.infer<typeof TrackPatchSchema>;
+type TrackFormData = z.input<typeof TrackPatchSchema>;
 
 export default function Edit({
   track,
@@ -30,14 +30,13 @@ export default function Edit({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [bandsData, setBandsData] = useState<Band[]>(bands);
 
-  const { register, handleSubmit, formState, reset, setValue } =
-    useForm<TrackFormData>({
-      resolver: zodResolver(TrackPatchSchema),
-      shouldUnregister: true,
-      defaultValues: {
-        id: track.id,
-      },
-    });
+  const { register, handleSubmit, formState, reset } = useForm<TrackFormData>({
+    resolver: zodResolver(TrackPatchSchema),
+    shouldUnregister: true,
+    defaultValues: {
+      id: track.id,
+    },
+  });
 
   const onSubmit = async (trackData: TrackFormData) => {
     try {

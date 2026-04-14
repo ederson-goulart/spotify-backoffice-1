@@ -16,7 +16,7 @@ interface Props {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-type BandFormData = z.infer<typeof BandPatchSchema>;
+type BandFormData = z.input<typeof BandPatchSchema>;
 
 export default function Edit({
   band,
@@ -46,7 +46,7 @@ export default function Edit({
       bandFormData.append("name", band.name);
       bandFormData.append("slug", band.slug);
       bandFormData.append("description", band.description || "");
-      bandFormData.append("status", band.status);
+      bandFormData.append("status", band.status || "active");
 
       if (band.cover) {
         Array.from(band.cover).forEach((cover) => {
