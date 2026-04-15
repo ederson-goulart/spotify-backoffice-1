@@ -8,10 +8,16 @@ import { StatsSkeleton } from "./components/StatsSkeleton";
 
 export const dynamic = "force-dynamic";
 
-async function AnalyticsData({ period }: { period: string }) {
+async function AnalyticsData({
+  period,
+  page,
+}: {
+  period: string;
+  page: number;
+}) {
   const baseUrl = process.env.API_URL || "http://localhost:3000";
   const response = await fetch(
-    `${baseUrl}/api/analytics/stats?period=${period}`,
+    `${baseUrl}/api/analytics/stats?period=${period}&page=${page}&limit=10`,
     {
       cache: "no-store",
     },
@@ -31,6 +37,7 @@ export default async function AnalyticsPage({
 }) {
   const params = await searchParams;
   const period = (params.period as string) || "7d";
+  const page = parseInt((params.page as string) || "1");
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -69,15 +76,21 @@ export default async function AnalyticsPage({
         </div>
 
         <Suspense fallback={<StatsSkeleton />}>
-          <AnalyticsContent period={period} />
+          <AnalyticsContent period={period} page={page} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-async function AnalyticsContent({ period }: { period: string }) {
-  const data = await AnalyticsData({ period });
+async function AnalyticsContent({
+  period,
+  page,
+}: {
+  period: string;
+  page: number;
+}) {
+  const data = await AnalyticsData({ period, page });
 
   return (
     <>
@@ -127,7 +140,10 @@ async function AnalyticsContent({ period }: { period: string }) {
 
       {/* Recent Events */}
       <div>
-        <RecentEventsTable events={data.recentEvents} />
+        <RecentEventsTable
+          events={data.recentEvents}
+          pagination={data.recentEventsPagination}
+        />
       </div>
     </>
   );

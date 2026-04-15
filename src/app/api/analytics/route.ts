@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 
+async function getGeolocation(ip: string) {
+  try {
+    const response = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,city,regionName,lat,lon,timezone,isp,org,as`,
+    );
+    const data = await response.json();
+    if (data.status === "success") {
+      return {
+        country: data.country,
+        city: data.city,
+        region: data.regionName,
+        lat: data.lat,
+        lon: data.lon,
+        timezone: data.timezone,
+        isp: data.isp,
+        org: data.org,
+        as: data.as,
+      };
+    }
+  } catch (error) {
+    console.error("Geolocation error:", error);
+  }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,12 +38,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get client IP
+    const forwarded = request.headers.get("x-forwarded-for");
+    const realIp = request.headers.get("x-real-ip");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : realIp || "unknown";
+
+    // Get geolocation data
+    const geoData = ip !== "unknown" ? await getGeolocation(ip) : null;
+
+    const enhancedMetadata = {
+      ...metadata,
+      ip,
+      ...geoData,
+    };
+
     const analyticsEvent = await prisma.analyticsEvent.create({
       data: {
         type,
         page,
         action: action || null,
-        metadata: metadata || null,
+        metadata: enhancedMetadata,
       },
     });
 

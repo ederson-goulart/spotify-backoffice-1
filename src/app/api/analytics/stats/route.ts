@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../lib/prisma";
-
+interface AnalyticsMetadata {
+  ip?: string;
+  country?: string;
+  city?: string;
+  region?: string;
+  isp?: string;
+  userAgent?: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
 /**
  * GET /api/analytics/stats
  * Retorna estatísticas agregadas de analytics
@@ -9,6 +17,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const period = searchParams.get("period") || "7d"; // "24h", "7d", "30d", "all"
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
 
     // Calcular data de início baseada no período
     let startDate = new Date();
@@ -97,13 +107,25 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Eventos recentes
+    // Eventos recentes com paginação
     const recentEvents = await prisma.analyticsEvent.findMany({
       orderBy: {
         timestamp: "desc",
       },
-      take: 50,
+      take: limit,
+      skip: (page - 1) * limit,
+      select: {
+        id: true,
+        type: true,
+        page: true,
+        action: true,
+        timestamp: true,
+        metadata: true,
+      },
     });
+
+    // Total de eventos recentes para paginação
+    const totalRecentEvents = await prisma.analyticsEvent.count();
 
     // Taxa de erros
     const totalEvents = await prisma.analyticsEvent.count({
@@ -142,13 +164,27 @@ export async function GET(request: NextRequest) {
         count: item._count,
       })),
       hourlyDistribution: hourlyData,
-      recentEvents: recentEvents.map((event) => ({
-        id: event.id,
-        type: event.type,
-        page: event.page,
-        action: event.action,
-        timestamp: event.timestamp,
-      })),
+      recentEvents: recentEvents.map((event) => {
+        const metadata = event.metadata as AnalyticsMetadata;
+        return {
+          id: event.id,
+          type: event.type,
+          page: event.page,
+          action: event.action,
+          timestamp: event.timestamp,
+          ip: metadata?.ip || null,
+          country: metadata?.country || null,
+          city: metadata?.city || null,
+          region: metadata?.region || null,
+          isp: metadata?.isp || null,
+        };
+      }),
+      recentEventsPagination: {
+        page,
+        limit,
+        total: totalRecentEvents,
+        totalPages: Math.ceil(totalRecentEvents / limit),
+      },
       errorStats: {
         total: errorCount,
         rate: parseFloat(errorRate.toString()),
